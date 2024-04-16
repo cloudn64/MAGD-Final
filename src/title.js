@@ -2,7 +2,7 @@ var title;
 
 class TitleState {
     constructor() {
-        this.testString = "Wow, we did it!";
+        this.testString = "Title Screen Test String";
     }
 }
 
@@ -13,10 +13,12 @@ function titleScreenInit(state) {
     title = state.stateObject;
 }
 
+// This function runs before Draw
 function titleScreenUpdate(state) {
-
+    
 }
 
+// This function runs after Update
 function titleScreenDraw(state) {
     fill(2255, 255, 255);
     text(title.testString, 20, 20);

@@ -1,5 +1,7 @@
 /*
-    Controller class for the game's various states to streamline function switching and whatnot.
+    GameState
+
+    State controller class for the game's various game states (Title/Battle) to streamline function switching and whatnot.
     Design is based on C language, which is why inheritance is not used for this.
 */
 
@@ -18,8 +20,44 @@ const sGameStateFuncs = [
 // Base gamestate class
 class GameState {
     // Using an invalid value for stateId is UNSAFE-- but you won't do that, right? Why would you?
-    constructor(isActive, stateId) {
-        this.isActive = isActive;
+    constructor(stateId) {
+        this.isInitialized; // does not run the draw or update when this is false. Is set to false by changed gamestates, true by init
+        this.initFunc; // function pointer to gamestate initialization (more details in change function)
+        this.drawFunc; // function pointer to gamestate drawing (more details in change function)
+        this.updateFunc; // function pointer to gamestate updating (more details in change function)
+        this.stateObject; // state dependent object (more details in change function)
+
+        this.change(stateId);
+    }
+
+    // Invoke non-null gamestate initialization function pointer
+    init() {
+        if (!this.isInitialized && this.initFunc != null) {
+            this.initFunc(this); // call function pointer
+            this.isInitialized = true;
+        }
+    }
+
+    // Invoke non-null gamestate update function pointer if the gamestate is active
+    update() {
+        if (this.isInitialized && this.updateFunc != null) {
+            this.updateFunc(this); // call function pointer
+        }
+    }
+
+    // Invoke non-null gamestate draw function pointer if the gamestate is active
+    draw() {
+        if (this.isInitialized && this.drawFunc != null) {
+            this.drawFunc(this); // call function pointer
+        }
+    }
+
+    // swap gamestates
+    change(stateId) {
+        // Set to false by change of gamestate.
+        // This is so a gamestate changed in the update function does not call the next state's draw function 
+        // before it is updated once. Set to true at the start of a frame, then runs init.
+        this.isInitialized = false;
 
         // Set up function pointers
         this.initFunc = sGameStateFuncs[stateId].init; // initial function pointer
@@ -29,50 +67,20 @@ class GameState {
         // This object will be used by the gamestate, its type will be the appropriate gamestate class.
         // Gamestates have a pointer to this with a name that's easier to use.
         this.stateObject = null;
-
-        // Call the gamestate's init function (appropriate function has null check)
-        // Gamestate init functions will set the stateObject to the appropriate GameState object.
-        this.init();
-    }
-
-    // Invoke non-null gamestate initialization function pointer
-    init() {
-        if (this.initFunc != null) {
-            this.initFunc(this); // call function pointer
-        }
-    }
-
-    // Invoke non-null gamestate update function pointer if the gamestate is active
-    update() {
-        if (this.isActive && this.updateFunc != null) {
-            this.updateFunc(this); // call function pointer
-        }
-    }
-
-    // Invoke non-null gamestate draw function pointer if the gamestate is active
-    draw() {
-        if (this.isActive && this.drawFunc != null) {
-            this.drawFunc(this); // call function pointer
-        }
-    }
-
-    // swap gamestates
-    change(nextState) {
-        constructor(true, nextState);
     }
 
 }
 
 /*
-
     Example/Debug GameState below here
-
 */
 
 var debug;
 
 class DebugState { 
-    // nothing
+    constructor() {
+        this.testString = "Debug Test String";
+    }
 }
 
 function debugInit(state) {
@@ -86,5 +94,6 @@ function debugUpdate(state) {
 }
 
 function debugDraw(state) {
-    print("test draw!!");
+    fill(2255, 255, 255);
+    text(debug.testString, 20, 20);
 }
