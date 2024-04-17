@@ -1,3 +1,5 @@
+// I haven't decided if I care to use this yet
+
 class DAsset {
     constructor() {
       this.asset; // Current fully loaded asset

@@ -57,8 +57,11 @@ function titleScreenDraw(state) {
     Drawing stuff goes in the titleScreenDraw function
     Other stuff like reacting to button presses and stuff goes in the titleScreenUpdate function
 
-    A nice title screen has sounds and doesn't have things pop up instantly,
-    but whatever you can do should be alright.
+    A nice title screen has sounds, fonts, graphics, and doesn't have things pop up instantly--
+    but whatever you can do should be alright!
+
+    Lab 8 has an example of loading fonts and images, I think.
+    Lab 9 has an example of sound, I think.
 
     You are free to message me if you need help.
 
