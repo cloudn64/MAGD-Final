@@ -1,17 +1,16 @@
 var gamestate;
+var highscores;
 
 function setup() {
   createCanvas(640, 480);
 
   gamestate = new GameState(PRELOAD_STATE);
+  highscores = new HighscoreList("highscore.txt");
+
 }
 
 function draw() {
   background(0);
-
-  if (keyIsDown(70)) {
-    gamestate.change(BATTLE_STATE);
-  }
 
   // The game's current state is initialized if necessary
   gamestate.init();

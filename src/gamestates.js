@@ -12,13 +12,15 @@ const DEBUG_STATE = 0;
 const BATTLE_STATE = 1;
 const TITLE_STATE = 2;
 const PRELOAD_STATE = 3;
+const PREBATTLE_STATE = 4;
 
 // Function pointers to be used according to corresponding gamestate ID
 const sGameStateFuncs = [ 
     { init: debugInit, update: debugUpdate, draw: debugDraw }, // Debug gamestate functions (defined below)
     { init: battleInit, update: battleUpdate, draw: battleDraw }, // Battle gamestate functions (defined in battle.js)
     { init: titleScreenInit, update: titleScreenUpdate, draw: titleScreenDraw }, // Battle gamestate functions (defined in battle.js)
-    { init: preloadInit, update: preloadUpdate, draw: preloadDraw } // Preload gamestate functions (defined in preload.js)
+    { init: preloadInit, update: preloadUpdate, draw: preloadDraw }, // Preload gamestate functions (defined in preload.js)
+    { init: preBattleInit, update: preBattleUpdate, draw: preBattleDraw } // Pre-Battle gamestate functions (defined in battle.js)
  ];
 
 // Base gamestate class

@@ -34,6 +34,5 @@ function preloadDraw(state) {
     fill(255, 255, 255);
     textAlign(CENTER);
     textSize(15);
-    text(gamestate.transitionColor[0] + ", " + gamestate.transitionColor[1] + ", " + gamestate.transitionColor[2], width / 2, height / 2);
-    //text("placeholder screen\ntap the screen to start the game\n\nhere are some swear words to make sure this doesn't stay in the game\nfuck fuck fuck fuck fuck fuck fuck fuck fuck fuck fuck", width / 2, height / 2);
+    text("placeholder screen\ntap the screen to start the game\n\nhere are some swear words to make sure this doesn't stay in the game\nfuck fuck fuck fuck fuck fuck fuck fuck fuck fuck fuck", width / 2, height / 2);
 }
