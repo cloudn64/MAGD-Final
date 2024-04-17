@@ -1,3 +1,11 @@
+/*
+
+    TitleState
+
+    The title screen.
+
+*/
+
 var title;
 
 class TitleState {
@@ -8,7 +16,6 @@ class TitleState {
 
 function titleScreenInit(state) {
     print("Title Screen Initialize!");
-
     state.stateObject = new TitleState();
     title = state.stateObject;
 }
@@ -21,5 +28,7 @@ function titleScreenUpdate(state) {
 // This function runs after Update
 function titleScreenDraw(state) {
     fill(2255, 255, 255);
-    text(title.testString, 20, 20);
+    textAlign(CENTER);
+    textSize(20);
+    text("placeholder title screen", width / 2, height / 2);
 }

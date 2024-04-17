@@ -1,20 +1,24 @@
 /*
+
     GameState
 
     State controller class for the game's various game states (Title/Battle) to streamline function switching and whatnot.
-    Design is based on C language, which is why inheritance is not used for this.
+    Design is based on C language, because I barely ever use javascript.
+
 */
 
 // Not using an enum today! These are 'macros' for the gamestate IDs, because remembering numbers is lame
 const DEBUG_STATE = 0;
 const BATTLE_STATE = 1;
 const TITLE_STATE = 2;
+const PRELOAD_STATE = 3;
 
 // Function pointers to be used according to corresponding gamestate ID
 const sGameStateFuncs = [ 
     { init: debugInit, update: debugUpdate, draw: debugDraw }, // Debug gamestate functions (defined below)
     { init: battleInit, update: battleUpdate, draw: battleDraw }, // Battle gamestate functions (defined in battle.js)
-    { init: titleScreenInit, update: titleScreenUpdate, draw: titleScreenDraw } // Battle gamestate functions (defined in battle.js)
+    { init: titleScreenInit, update: titleScreenUpdate, draw: titleScreenDraw }, // Battle gamestate functions (defined in battle.js)
+    { init: preloadInit, update: preloadUpdate, draw: preloadDraw } // Preload gamestate functions (defined in preload.js)
  ];
 
 // Base gamestate class
@@ -26,6 +30,11 @@ class GameState {
         this.drawFunc; // function pointer to gamestate drawing (more details in change function)
         this.updateFunc; // function pointer to gamestate updating (more details in change function)
         this.stateObject; // state dependent object (more details in change function)
+
+        this.transitionTarget; // Is -1 if the transition is inactive. Otherwise, this creates a transition to another GameState
+        this.transitionSpeed = 10;
+        this.transitionAlpha = 255; // Alpha of the transition. Is 255 because the start of the game is the end of a transition
+        this.transitionColor = [255, 255, 255]; // RGB Color of the transition
 
         this.change(stateId);
     }
@@ -57,7 +66,11 @@ class GameState {
         // Set to false by change of gamestate.
         // This is so a gamestate changed in the update function does not call the next state's draw function 
         // before it is updated once. Set to true at the start of a frame, then runs init.
+        // If you only use transitions, that wouldn't happen, but-- I dunno. It's nice to be careful.
         this.isInitialized = false;
+
+        // Marks end of a transition
+        this.transitionTarget = -1;
 
         // Set up function pointers
         this.initFunc = sGameStateFuncs[stateId].init; // initial function pointer
@@ -68,6 +81,17 @@ class GameState {
         // Gamestates have a pointer to this with a name that's easier to use.
         this.stateObject = null;
     }
+
+    // transition to another gamestate
+    transition(stateId, speed, r, g, b) {
+        this.transitionTarget = stateId;
+        this.transitionSpeed = speed;
+        this.transitionColor[0] = r;
+        this.transitionColor[1] = g;
+        this.transitionColor[2] = b;
+    }
+
+    
 
 }
 
