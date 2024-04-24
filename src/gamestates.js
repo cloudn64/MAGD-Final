@@ -86,6 +86,9 @@ class GameState {
 
     // transition to another gamestate
     transition(stateId, speed, r, g, b) {
+        if (this.transitionTarget != -1) {
+            return; // already in a transition!
+        }
         this.transitionTarget = stateId;
         this.transitionSpeed = speed;
         this.transitionColor[0] = r;

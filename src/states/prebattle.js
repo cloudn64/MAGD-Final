@@ -10,7 +10,7 @@ var preBattle;
 
 class PreBattleState {
     constructor() {
-        this.testString = "GOGOg";
+        // nothing at the moment
     }
 }
 
@@ -30,4 +30,6 @@ function preBattleDraw(state) {
     textAlign(CENTER);
     textSize(50);
     text("This is the prebattle screen", width / 2, height / 2);
+
+
 }
