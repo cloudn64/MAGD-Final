@@ -25,7 +25,7 @@ function titleScreenUpdate(state) {
     title.temporaryButton.update();
 
     if (title.temporaryButton.click == true) {
-        state.transition(PREBATTLE_STATE, 5, 255, 255, 255);
+        state.transition(BATTLE_STATE, 5, 255, 255, 255);
         title.temporaryButton.ignore = true;
     }
 }

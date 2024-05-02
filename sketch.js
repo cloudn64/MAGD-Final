@@ -1,6 +1,10 @@
 var gamestate;
 var highscores;
 
+function preload() {
+  //testFont = loadFont('assets/fonts/animeace2_reg.otf');
+}
+
 function setup() {
   createCanvas(640, 480);
 
