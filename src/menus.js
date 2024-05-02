@@ -220,10 +220,121 @@ class Button {
 
 }
 
-function newButton(name, x, y, width, height, alignX, alignY) {
+function newButton(name, x, y, width, height, textSize, alignX, alignY) {
     var button = new Button(name, x, y, width, height);
+    button.textSize = textSize;
     button.buttonAlignX = alignX;
     button.buttonAlignY = alignY;
     // add more as necessary
     return button;
+}
+
+// Menu - The class for having some options in a box.
+class Menu {
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        this.backgroundColor = '#0000FFFF';
+        this.borderColor = '#FFFFFFFF';
+        this.buttonColor = '#00000000';
+        this.highlightedButtonColor = '#FFFFFF66';
+        this.textColor = '#FFFFFFFF';
+        this.borderDensity = 10;
+        this.border = true;
+        this.textSize = 30;
+
+        // p5js is poopy and web browsers are poopy so I have to create this here
+        this.menuGraphics = createGraphics(this.width - (this.borderDensity * 2), this.height - (this.borderDensity * 2));
+
+        this.scrollX = 0; // should be unused because a menu doesn't scroll horizontally, but is here because it can be here
+        this.scrollY = 0; // min value of 0. Will be subtracted because negative numbers go up.
+
+        this.optionsPerRow = 3;
+        this.optionsPerColumn = 5;
+        this.options = new Array();
+
+        this.highlightedOption = -1;
+
+        this.scrollDelta = 0;
+        this.scrollSpeed = 0.001;
+
+        this.visible = true;
+    }
+
+    // function checks if the mouse is in the area within the menu's local boundaries.
+    mouseAtLocal(x, y, w, h) {
+        var realX = constrain(x + this.x + this.borderDensity, this.x + this.borderDensity, this.x + this.menuGraphics.width);
+        var realY = constrain(y + this.y + this.borderDensity, this.y + this.borderDensity, this.y + this.menuGraphics.height);
+        var realW = constrain((x + w + this.borderDensity) + this.x, realX, this.x + this.menuGraphics.width);
+        var realH = constrain((y + h + this.borderDensity) + this.y, realY, this.y + this.menuGraphics.height);
+
+        if (mouseX > realX && mouseX < realW && mouseY > realY && mouseY < realH) {
+            return true;
+        }
+
+        return false;
+    }
+
+    draw() {
+        var borderOffset = (this.border) ? this.borderDensity : 0;
+
+        if (this.options == null) {
+            print("options array not initialized! I can't do this!!");
+            return;
+        }
+
+        /*  MENU CONTROL  */
+        // 99% of the time controls should go in the update function to maintain consistency, this is the 1% of the time where I'm not going to do that
+        this.highlightedOption = -1;
+        // This event listener was very tricky, I had to do research for this
+            window.addEventListener("wheel", event => {
+                if (this.mouseAtLocal(0, 0, this.width, this.height)) {
+                    this.scrollY += (event.deltaY * this.scrollSpeed);
+                }
+            });
+
+        var maxScrollY = (ceil(this.options.length / this.optionsPerRow) - this.optionsPerColumn) * (this.menuGraphics.height / this.optionsPerColumn); // it's okay if the max is a negative number because the min is still 0
+        this.scrollY = constrain(this.scrollY, 0, maxScrollY);
+        
+        /*  MENU BORDER  */
+        if (this.border) {
+            noFill();
+            stroke(this.borderColor);
+            strokeWeight(this.borderDensity);
+            rect(this.x + (this.borderDensity / 2), this.y + (this.borderDensity / 2), this.width - (this.borderDensity), this.height - (this.borderDensity));
+        }
+
+        /*  MENU BACKGROUND  */
+        this.menuGraphics.background(this.backgroundColor);
+        
+        /*  MENU CONTENTS  */
+        this.menuGraphics.noStroke();
+        for (var i = 0; i < this.options.length; i++) {
+            var column = (int)(i / this.optionsPerRow);
+            var bWidth = this.menuGraphics.width / this.optionsPerRow;
+            var bX = (i - (column * this.optionsPerRow)) * bWidth;
+            var bHeight = this.menuGraphics.height / this.optionsPerColumn;
+            var bY = column * bHeight;
+            bY -= this.scrollY;
+
+            if (this.mouseAtLocal(bX, bY, bWidth, bHeight) && this.highlightedOption == -1) {
+                this.highlightedOption = i;
+                this.menuGraphics.fill(this.highlightedButtonColor);
+            } else {
+                this.menuGraphics.fill(this.buttonColor);
+            }
+            this.menuGraphics.rect(bX, bY, bWidth, bHeight);
+
+            this.menuGraphics.fill(this.textColor);
+            this.menuGraphics.textSize(this.textSize);
+            this.menuGraphics.textAlign(CENTER, CENTER);
+            this.menuGraphics.text(this.options[i], bX + (bWidth / 2), bY + (bHeight / 2));
+        }
+
+        /*  MENU DRAW  */
+        image(this.menuGraphics, this.x + borderOffset, this.y + borderOffset);
+    }
 }
