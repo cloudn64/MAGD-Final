@@ -246,6 +246,7 @@ function activateSkill(source, target, skillIndex) {
     source.atbTimer = 0; // Spend the ATB
     if (skillIndex == -1) {
         print(source.name + " ATTACKING " + target.name);
+        source.setupAttack();
     } else {
         var skill = source.skills[skillIndex];
         print(source.name + " CASTING " + skill.name + " ON " + target.name);

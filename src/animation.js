@@ -12,14 +12,22 @@ class SpriteAnimation {
         this.endFrame = 0;
         this.speed = 1.0;
         this.frameTimer = 0.0;
+
+        this.loop = false;
+        this.done = true;
     }
 
     draw(spriteX, spriteY, scaleX, scaleY, rotation) {
 
         // update the frame
         this.frameTimer += this.speed;
-        if (this.frameTimer > this.endFrame) this.frameTimer = 0;
-        if (this.frameTimer < 0) this.frameTimer = this.endFrame; // for reverse
+        if (this.loop) {
+            if (this.frameTimer > this.endFrame) this.frameTimer = 0;
+            if (this.frameTimer < 0) this.frameTimer = this.endFrame; // for reverse
+        } else {
+            this.frameTimer = constrain(this.frameTimer, 0, this.endFrame);
+            if (this.frameTimer >= this.endFrame) this.done = true;
+        }
         this.frame = ((int)(this.frameTimer));
 
         if (this.loadedAnim != this.anim) { // reload the animation
@@ -41,9 +49,11 @@ class SpriteAnimation {
         }
     }
 
-    changeAnim(ID, endFrame, speed) {
+    changeAnim(ID, endFrame, speed, loop) {
         this.anim = ID;
         this.endFrame = endFrame;
         this.speed = speed;
+        this.done = false;
+        this.loop = loop;
     }
 }

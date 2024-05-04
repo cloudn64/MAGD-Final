@@ -49,13 +49,18 @@ class Character {
         this.scaleY = 1;
         this.rotation = 0;
 
-        this.animation.changeAnim(0, 6, 0.02);
+        this.animation.changeAnim(0, 6, 0.02, true);
+        // this.animation.changeAnim(1, 6, 0.22);
     }
 
     drawSkillMenu() {
         if (this.skillMenu != null) {
             this.skillMenu.draw();
         }
+    }
+
+    setupAttack() {
+        this.animation.changeAnim(1, 6, 0.12);
     }
 
     update(atbIsPaused) {
@@ -93,6 +98,10 @@ class Character {
     }
 
     draw() {
+        if (this.animation.anim == 1 && this.animation.done) {
+            this.animation.changeAnim(0, 6, 0.02, true);
+        }
+
         this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
     }
 
