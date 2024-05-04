@@ -229,22 +229,34 @@ function newButton(name, x, y, width, height, textSize, alignX, alignY) {
     return button;
 }
 
+class MenuOption {
+    constructor(name, cost, available) {
+        this.name = name;
+        this.cost = cost; // can just be "" if you don't want one to be here, c'mon we're working on a time limit!
+        this.available = available;
+    }
+}
+
 // Menu - The class for having some options in a box.
+// It's also overcooked. Well, this is what happens when I have to rush.
 class Menu {
-    constructor(x, y, width, height) {
+    constructor(x, y, width, height, tTextSize, tSubtextSize) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
 
-        this.backgroundColor = '#0000FFFF';
+        this.backgroundColor = '#3333FFCC';
         this.borderColor = '#FFFFFFFF';
         this.buttonColor = '#00000000';
         this.highlightedButtonColor = '#FFFFFF66';
+        this.downButtonColor = '#FFFFFF99';
         this.textColor = '#FFFFFFFF';
-        this.borderDensity = 10;
+        this.unavailableTextColor = '#444444FF';
+        this.borderDensity = 4;
         this.border = true;
-        this.textSize = 30;
+        this.textSize = tTextSize;
+        this.mpTextSize = tSubtextSize;
 
         // p5js is poopy and web browsers are poopy so I have to create this here
         this.menuGraphics = createGraphics(this.width - (this.borderDensity * 2), this.height - (this.borderDensity * 2));
@@ -257,11 +269,19 @@ class Menu {
         this.options = new Array();
 
         this.highlightedOption = -1;
+        this.prevHighlightedOption = -1;
+        this.click = false;
+        this.release = false;
+        this.hold = false;
+        this.draggedOff = false; // flag for misbehaving by dragging the held mouse onto another button
 
         this.scrollDelta = 0;
         this.scrollSpeed = 0.001;
 
-        this.visible = true;
+        this.highlightSfx = null; // If not null, uses this sound when the button is highlighted
+        this.pressSfx = null; // If not null, uses this sound when the button is pressed
+        this.releaseSfx = null; // If not null, uses this sound when the button is released
+        this.unavailableSfx = null; // If not null, uses this sound when the disabled button is pressed
     }
 
     // function checks if the mouse is in the area within the menu's local boundaries.
@@ -278,6 +298,13 @@ class Menu {
         return false;
     }
 
+    getChosen() {
+        if (this.click || this.hold && !this.draggedOff && this.highlightedOption == this.prevHighlightedOption) {
+            return this.highlightedOption;
+        }
+        return -1;
+    }
+
     draw() {
         var borderOffset = (this.border) ? this.borderDensity : 0;
 
@@ -288,6 +315,7 @@ class Menu {
 
         /*  MENU CONTROL  */
         // 99% of the time controls should go in the update function to maintain consistency, this is the 1% of the time where I'm not going to do that
+        this.prevHighlightedOption = this.highlightedOption;
         this.highlightedOption = -1;
         // This event listener was very tricky, I had to do research for this
             window.addEventListener("wheel", event => {
@@ -322,19 +350,370 @@ class Menu {
 
             if (this.mouseAtLocal(bX, bY, bWidth, bHeight) && this.highlightedOption == -1) {
                 this.highlightedOption = i;
-                this.menuGraphics.fill(this.highlightedButtonColor);
+                if (this.options[i].available && (this.prevHighlightedOption == this.highlightedOption) && (this.click || this.hold)) {
+                    this.menuGraphics.fill(this.downButtonColor);
+                } else {
+                    this.menuGraphics.fill(this.highlightedButtonColor);
+                }
             } else {
                 this.menuGraphics.fill(this.buttonColor);
             }
             this.menuGraphics.rect(bX, bY, bWidth, bHeight);
 
-            this.menuGraphics.fill(this.textColor);
+            if (!this.options[i].available) {
+                this.menuGraphics.fill(this.unavailableTextColor);
+            } else {
+                this.menuGraphics.fill(this.textColor);
+            }
             this.menuGraphics.textSize(this.textSize);
             this.menuGraphics.textAlign(CENTER, CENTER);
-            this.menuGraphics.text(this.options[i], bX + (bWidth / 2), bY + (bHeight / 2));
+            // name text
+            this.menuGraphics.text(this.options[i].name, bX + (bWidth / 2), bY + (bHeight / 2));
+            this.menuGraphics.textSize(this.mpTextSize);
+            this.menuGraphics.textAlign(RIGHT, BOTTOM);
+            this.menuGraphics.text(this.options[i].cost, bX + bWidth, bY + bHeight);
         }
 
         /*  MENU DRAW  */
         image(this.menuGraphics, this.x + borderOffset, this.y + borderOffset);
+
+        if (this.prevHighlightedOption != this.highlightedOption) {
+            print("dragged off! Were you trying to discover a glitch or somethin'?");
+            this.draggedOff = true;
+        } else if (!mouseIsPressed) {
+            this.draggedOff = false;
+        }
+
+        if (this.highlightedOption != -1 && !this.draggedOff) {
+            if (mouseIsPressed) { // mouse is pressed over button
+                this.release = false; // you're pushing the button so you're not releasing it.
+                if (!this.click && !this.hold) { // If not click or hold, set click
+                    this.click = true;
+                    if ((this.options[this.highlightedOption].available) && this.clickSfx != null) {
+                        this.clickSfx.play(); // assumes this is a sound and tries to play it
+                    } else if ((!this.options[this.highlightedOption].available) && this.unavailableSfx != null) {
+                        this.unavailableSfx.play(); // assumes this is a sound and tries to play it
+                    }
+                } else if (this.click && !this.hold) { // If click but not hold, click is two frames, change to hold
+                    this.click = false;
+                    this.hold = true;
+                }
+            } else { // mouse is over button but not pressed
+                if (this.click || this.hold) { // button was being clicked or held and isn't anymore
+                    this.release = true;
+                } else if (this.release) { // button has been released for over a frame
+                    this.release = false;
+                }
+                this.click = false;
+                this.hold = false;
+            }
+        } else { // mouse is not over the button
+            if (this.click || this.hold) { // button was being clicked or held and isn't anymore because you dragged the mouse off of it
+                this.click = false;
+                this.hold = false;
+                this.release = true;
+            } else if (this.release) { // button has been released for over a frame after you dragged the mouse off of it
+                this.release = false;
+                this.click = false;
+                this.hold = false;
+            }
+        }
+    }
+}
+
+// Helpful lil' guy
+class SkillMenu {
+    constructor(owner, skills, x, y, w, h, textSize, subtextSize) {
+        this.menu = new Menu(x, y, w, h, textSize, subtextSize);
+        this.owner = owner;
+        this.skills = skills;
+
+        for (var skill = 0; skill < this.skills.length; skill++) {
+            var thisSkill = this.skills[skill];
+            print(thisSkill.name);
+            if (thisSkill != null) {
+                this.menu.options.push(new MenuOption(thisSkill.name, thisSkill.mpCost + "MP", thisSkill.mpCost <= this.owner.mp));
+            }
+        }
+    }
+
+    draw() {
+        for (var skill = 0; skill < this.skills.length; skill++) {
+            var thisSkill = this.skills[skill];
+            if (thisSkill.mpCost > this.owner.mp) {
+                this.menu.options[skill].available = false;
+            } else {
+                this.menu.options[skill].available = true;
+            }
+        }
+        this.menu.draw();
+    }
+}
+
+// the HP and MP of characters in your party. I haven't decided if I want to support there being more than one party member yet.
+// This is obviously built off of the menu class, and if I had more foresight, they would probably be the same thing.
+// Here we are, though.
+class BattleStatus {
+    constructor(x, y, width, height, battle) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.battleState = battle;
+
+        this.backgroundColor = '#3333FFCC';
+        this.borderColor = '#FFFFFFFF';
+        this.buttonColor = '#00000000';
+        this.highlightedButtonColor = '#FFFFFF66';
+        this.downButtonColor = '#FFFFFF99';
+        this.textColor = '#FFFFFFFF';
+        this.unavailableTextColor = '#444444FF';
+        this.deadTextColor = '#FF4444FF';
+        this.unhealthyTextColor = '#FFFF44FF';
+        this.borderDensity = 4;
+        this.border = true;
+
+        // p5js is poopy and web browsers are poopy so I have to create this here
+        this.menuGraphics = createGraphics(this.width - (this.borderDensity * 2), this.height - (this.borderDensity * 2));
+
+        this.highlightedOption = -1;
+        this.prevHighlightedOption = -1;
+        this.click = false;
+        this.release = false;
+        this.hold = false;
+        this.draggedOff = false; // flag for misbehaving by dragging the held mouse onto another button
+
+        this.highlightSfx = null; // If not null, uses this sound when the button is highlighted
+        this.pressSfx = null; // If not null, uses this sound when the button is pressed
+        this.releaseSfx = null; // If not null, uses this sound when the button is released
+        this.unavailableSfx = null; // If not null, uses this sound when the disabled button is pressed
+
+        this.nameTextSize = 15;
+        this.hpMpTextSize = 15;
+
+        this.maxCharacters = 4;
+        this.optCharacterIndex = [this.maxCharacters];
+
+        this.selectedOption = -1; // currently selected
+
+        this.selectAlphaWave = 0; // a sine wave for the alpha of the selected option
+        this.selectAlphaAngle = 0; // not actually an angle, but is named "angle" because it's being used in sine
+    }
+
+    // function checks if the mouse is in the area within the menu's local boundaries.
+    mouseAtLocal(x, y, w, h) {
+        var realX = constrain(x + this.x + this.borderDensity, this.x + this.borderDensity, this.x + this.menuGraphics.width);
+        var realY = constrain(y + this.y + this.borderDensity, this.y + this.borderDensity, this.y + this.menuGraphics.height);
+        var realW = constrain((x + w + this.borderDensity) + this.x, realX, this.x + this.menuGraphics.width);
+        var realH = constrain((y + h + this.borderDensity) + this.y, realY, this.y + this.menuGraphics.height);
+
+        if (mouseX > realX && mouseX < realW && mouseY > realY && mouseY < realH) {
+            return true;
+        }
+
+        return false;
+    }
+
+    getChosen() {
+        return this.selectedOption;
+    }
+
+    draw() {
+        var borderOffset = (this.border) ? this.borderDensity : 0;
+
+        if (this.battleState == null) {
+            print("Battle state is null?!?!");
+            return;
+        } else if (this.battleState.characters == null) {
+            print("Chracters are null?!?!?!");
+            return;
+        }
+
+        if (this.selectedOption != -1) {
+            this.selectAlphaWave = ((sin(this.selectAlphaAngle++ / 20) + 1) * 20);
+        } else {
+            this.selectAlphaWave = 0;
+        }
+
+        /*  MENU CONTROL  */
+        // 99% of the time controls should go in the update function to maintain consistency, this is the 1% of the time where I'm not going to do that
+        this.prevHighlightedOption = this.highlightedOption;
+        this.highlightedOption = -1;
+
+        /*  MENU BORDER  */
+        if (this.border) {
+            noFill();
+            stroke(this.borderColor);
+            strokeWeight(this.borderDensity);
+            rect(this.x + (this.borderDensity / 2), this.y + (this.borderDensity / 2), this.width - (this.borderDensity), this.height - (this.borderDensity));
+        }
+
+        /*  MENU BACKGROUND  */
+        this.menuGraphics.background(this.backgroundColor);
+        
+        /*  MENU CONTENTS  */
+        this.menuGraphics.noStroke();
+        var charactersParsed = 0;
+        // each index has an ID of 0 until you prove that it shouldn't
+        for (var k = 0; k < this.maxCharacters; k++) {
+            this.optCharacterIndex[k] = -1;
+        }
+        // draw each player character's stats (up to this.maxCharacters), also put ID of valid characters found into an array of options
+        for (var i = 0; i < this.battleState.characters.length; i++) {
+            var thisCharacter = this.battleState.characters[i];
+            var bWidth = this.menuGraphics.width;
+            var bX = 0;
+            var bHeight = this.menuGraphics.height / this.maxCharacters;
+            var bY = (i * this.menuGraphics.height / this.maxCharacters);
+
+            if (charactersParsed >= this.maxCharacters) {
+                break;
+            } else if (thisCharacter == null/* || thisCharacter.isPlayer == false*/) { // UNCOMMENT THIS!
+                continue;
+            } else {
+                this.optCharacterIndex[charactersParsed] = i;
+                charactersParsed++;
+            }
+
+            // Highlight
+            if (this.mouseAtLocal(bX, bY, bWidth, bHeight) && this.highlightedOption == -1) {
+                this.highlightedOption = i;
+                if (thisCharacter.dead && (this.prevHighlightedOption == this.highlightedOption) && (this.click || this.hold)) {
+                    this.menuGraphics.fill(this.downButtonColor);
+                } else {
+                    this.menuGraphics.fill(this.highlightedButtonColor);
+                }
+            } else {
+                this.menuGraphics.fill(this.buttonColor);
+            }
+            this.menuGraphics.rect(bX, bY, bWidth, bHeight);
+
+            // Select
+            if ((charactersParsed - 1 == this.selectedOption)) {
+                this.menuGraphics.fill(0, this.selectAlphaWave);
+                this.menuGraphics.rect(bX, bY, bWidth, bHeight);
+            }
+
+            // ATB Bar
+            var atbBarScale = 7;
+            var atbBarHeight = (bHeight - (atbBarScale * 2));
+            this.menuGraphics.fill('#333333FF');
+            this.menuGraphics.rect(bX + 8, bY + atbBarScale, 6, atbBarHeight);
+            // ATB Bar Fill
+            var atbBarFill = (thisCharacter.atbTimer / (ATB_MAX - thisCharacter.speed));
+            this.menuGraphics.fill(255 - (atbBarFill * 255), (atbBarFill * 255), 0, 255);
+            this.menuGraphics.rect(bX + 8, atbBarHeight - (atbBarFill * atbBarHeight) + bY + atbBarScale, 6, atbBarFill * atbBarHeight);
+
+
+            if (thisCharacter.dead) { // you are dead
+                this.menuGraphics.fill(this.deadTextColor);
+            } else if (thisCharacter.hp < (thisCharacter.maxHP / 10)) { // you have less than a tenth of your health
+                this.menuGraphics.fill(this.unhealthyTextColor);
+            } else {
+                this.menuGraphics.fill(this.textColor);
+            }
+
+            this.menuGraphics.textSize(this.nameTextSize);
+            this.menuGraphics.textAlign(LEFT, CENTER);
+            // name text
+            this.menuGraphics.text(thisCharacter.name, bX + 20, bY + (bHeight / 2));
+            this.menuGraphics.textSize(this.mpTextSize);
+            //this.menuGraphics.textAlign(RIGHT, BOTTOM);
+            //this.menuGraphics.text(this.options[i].cost, bX + bWidth, bY + bHeight);
+        }
+
+        /*  MENU DRAW  */
+        image(this.menuGraphics, this.x + borderOffset, this.y + borderOffset);
+
+        if (this.prevHighlightedOption != this.highlightedOption) {
+            print("dragged off! Were you trying to discover a glitch or somethin'?");
+            this.draggedOff = true;
+        } else if (!mouseIsPressed) {
+            this.draggedOff = false;
+        }
+
+        // cancel choice logic
+        if (this.selectedOption != -1) {
+            if (this.optCharacterIndex[this.selectedOption] == -1) { // not a real character (anymore?)
+                this.selectedOption = -1;
+            } else {
+                var selectedCharacter = this.battleState.characters[this.optCharacterIndex[this.selectedOption]];
+                if ((selectedCharacter.atbTimer < (ATB_MAX - selectedCharacter.speed)) || selectedCharacter.dead) { // Don't select character with not ready ATB or dead character
+                    this.selectedOption = -1;
+                }
+            }
+        }
+
+        // suitable choice logic (attempt to select a character automatically if a suitable one exists)
+        if (this.selectedOption == -1) {
+            for (var c = 0; c < this.maxCharacters; c++) {
+                if (this.optCharacterIndex[c] != -1) {
+                    var thisCharacter = this.battleState.characters[this.optCharacterIndex[c]];
+                    if (thisCharacter != null && !thisCharacter.dead && (thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed))) {
+                        this.selectedOption = c;
+                    }
+                }
+            }
+        }
+
+        // higlight logic
+        var highlightedCharacter = null;
+        var characterIsHighlighted = false;
+        var characterAtbReady = false;
+
+        if (this.highlightedOption != -1 && this.optCharacterIndex[this.highlightedOption] != -1) {
+            highlightedCharacter = this.battleState.characters[this.optCharacterIndex[this.highlightedOption]]; // should be confirmed not null by the earlier loop
+            if (highlightedCharacter == null) {
+                print("I'm null, why?");
+                this.highlightedOption = -1;
+            } else {
+                characterIsHighlighted = true;
+                if (highlightedCharacter.atbTimer >= (ATB_MAX - highlightedCharacter.speed)) characterAtbReady = true;
+            }
+        } else {
+            this.highlightedOption = -1;
+        }
+
+        if (this.highlightedOption != -1 && !this.draggedOff) {
+            if (mouseIsPressed) { // mouse is pressed over button
+                this.release = false; // you're pushing the button so you're not releasing it.
+                if (!this.click && !this.hold) { // If not click or hold, set click
+                    this.click = true;
+                    if ((characterIsHighlighted && !highlightedCharacter.dead && characterAtbReady)) { // not dead and ATB ready
+                        this.selectedOption = this.highlightedOption;
+                        print("I clicked a character");
+                        if (this.clickSfx != null) {
+                            this.clickSfx.play(); // assumes this is a sound and tries to play it
+                        }
+                    } else if ((characterIsHighlighted && (highlightedCharacter.dead || !characterAtbReady))) { // dead or not ATB ready
+                        print("this one's not ready boss (or they are dead, oh noes)");
+                        if (this.unavailableSfx != null) {
+                            this.unavailableSfx.play(); // assumes this is a sound and tries to play it
+                        }
+                    }
+                } else if (this.click && !this.hold) { // If click but not hold, click is two frames, change to hold
+                    this.click = false;
+                    this.hold = true;
+                }
+            } else { // mouse is over button but not pressed
+                if (this.click || this.hold) { // button was being clicked or held and isn't anymore
+                    this.release = true;
+                } else if (this.release) { // button has been released for over a frame
+                    this.release = false;
+                }
+                this.click = false;
+                this.hold = false;
+            }
+        } else { // mouse is not over the button
+            if (this.click || this.hold) { // button was being clicked or held and isn't anymore because you dragged the mouse off of it
+                this.click = false;
+                this.hold = false;
+                this.release = true;
+            } else if (this.release) { // button has been released for over a frame after you dragged the mouse off of it
+                this.release = false;
+                this.click = false;
+                this.hold = false;
+            }
+        }
     }
 }

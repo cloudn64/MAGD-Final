@@ -16,18 +16,27 @@ class BattleState {
         this.allPlayersDead = true;
         this.allEnemiesDead = true;
 
-        this.commandMenu = new Menu(0, height / 2, width, height / 2);
+        this.uiCharacter = 0; // if not -1, this is the ID of the character who is displaying the UI right now
+        this.uiPage = 0; // page 0 is the basic commands, page 1 is the skill menu, page 2 is the target menu
+        this.statusMenu = new BattleStatus(210, height - 159, width - 211, 158, this);
+        this.attackButton = newButton("Attack", 5, height - 155, 200, 30, LEFT, LEFT);
+        this.skillButton = newButton("Magic", 5, height - 115, 200, 30, LEFT, LEFT);
+        this.defendButton = newButton("Defend", 5, height - 75, 200, 30, LEFT, LEFT);
+        this.buttonFour = newButton("Item", 5, height - 35, 200, 30, LEFT, LEFT);
+
     }
 
     setupBattle0() { // test battle
-        append(this.characters, new Character(true,  this.characterTotal++, 9999, 999, 1, 1, 20, 1)); // add player
-        append(this.characters, new Character(false, this.characterTotal++, 2222, 128, 1, 1, 90, 1)); // add enemy
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 9999, 999, 1, 1, 20, 1)); // add player
+        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 2222, 128, 1, 1, 90, 1)); // add enemy
     }
 }
 
 function battleInit(state) {
     state.stateObject = new BattleState();
     battle = state.stateObject;
+
+    populateGlobalSkillList();
 
     battle.setupBattle0();
 }
@@ -44,10 +53,10 @@ function getRandomTarget(targetPlayers, targetEnemies) {
         if (curCharacter != null) {
             if (curCharacter.isPlayer && targetPlayers) {
                 print("add player to targetList");
-                append(targetList, curCharacter);
+                targetList.push(curCharacter);
             } else if (!curCharacter.isPlayer && targetEnemies) {
                 print("add enemy to targetList");
-                append(targetList, curCharacter);
+                targetList.push(curCharacter);
             }
         } else {
             print("character " + character + " is null and can't be targeted");
@@ -98,6 +107,25 @@ function battleUpdate(state) {
             curCharacter.update(battle.atbWait);
         }
     }
+
+    // UI
+    if (battle.uiCharacter != -1 && battle.characters[battle.uiCharacter] != null) {
+        
+        switch (battle.uiPage) {
+            case 0: // command menu
+                battle.attackButton.update();
+                battle.skillButton.update();
+                battle.defendButton.update();
+                battle.buttonFour.update();
+                break;
+            case 1: // skill (magic) menu
+                break;
+            case 2: // target menu
+                break;
+        }
+    }
+
+
 }
 
 // This function runs after Update
@@ -114,5 +142,27 @@ function battleDraw(state) {
     textAlign(LEFT, LEFT);
     text("atbPaused: " + battle.atbWait + "\nplayersAreDead: " + battle.allPlayersDead + "\nenemiesAreDead: " + battle.allEnemiesDead, 20, height - 80);*/
 
-    battle.commandMenu.draw();
+    //battle.commandMenu.draw();
+
+    //battle.characters[0].drawSkillMenu();
+
+    // draw the battle menu
+    if (battle.uiCharacter != -1 && battle.characters[battle.uiCharacter] != null) {
+        
+        switch (battle.uiPage) {
+            case 0: // command menu
+                battle.statusMenu.draw();
+                //battle.characters[battle.uiCharacter].drawSkillMenu();
+                battle.attackButton.draw();
+                battle.skillButton.draw();
+                battle.defendButton.draw();
+                battle.buttonFour.draw();
+                break;
+            case 1: // skill (magic) menu
+                battle.characters[battle.uiCharacter].drawSkillMenu();
+                break;
+            case 2: // target menu
+                break;
+        }
+    }
 }

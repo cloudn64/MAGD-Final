@@ -1,8 +1,15 @@
 const ATB_MAX = 400;
 
+const sPlayerSkillList = [
+    0,
+    1,
+    0,
+]
+
 class Character {
-    constructor(isPlayer, ID, maxHP, maxMP, str, def, spd, mag) { // ID should be assigned by the battle engine
+    constructor(isPlayer, ID, name, maxHP, maxMP, str, def, spd, mag) { // ID should be assigned by the battle engine
         this.isPlayer = isPlayer;
+        this.name = name;
         this.ID = ID;
         this.isReadyToAct = false; // ready to perform a chosen action
         this.isActing = false; // is performing an action
@@ -22,11 +29,22 @@ class Character {
         this.speed = spd; // amount to subtract the max ATB by. Used to be a multiplier until I found out how totally OP it is that a speed of 2 is twice as fast as a speed of 1
         this.magic = mag; // Magic power
 
-        this.skills = new Array(); // Skill array, I think. Kind of wild system, but wild is how we like it.
+        this.skills = skillListToSkills(sPlayerSkillList); // Skill array, I think. Kind of wild system, but wild is how we like it.
+
+        this.skillMenu = null;
+        if (this.isPlayer) {
+            this.skillMenu = new SkillMenu(this, this.skills, 210, height - 159, width - 211, 158, 20, 12);
+        }
 
         this.dead = false;
 
         this.atbTimer = 0;
+    }
+
+    drawSkillMenu() {
+        if (this.skillMenu != null) {
+            this.skillMenu.draw();
+        }
     }
 
     update(atbIsPaused) {
