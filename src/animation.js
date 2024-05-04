@@ -53,6 +53,8 @@ class SpriteAnimation {
 
     changeAnim(ID, endFrame, speed, loop) {
         this.anim = ID;
+        this.frame = 0;
+        this.frameTimer = 0;
         this.endFrame = endFrame;
         this.speed = speed;
         this.done = false;

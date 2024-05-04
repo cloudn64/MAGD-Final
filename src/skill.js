@@ -8,11 +8,9 @@ class Skill {
         this.description = desc; // example: "(name) threw a rock!" "(name) charged up his power!"
         this.potency = potency;
         this.mpCost = mpCost;
-        this.targetAllies = targetAllies;
-        this.targetDead = targetDead;
-        this.attackFunction = atk;
-        this.updateFunction = upd;
-        this.drawFunction = drw;
+        this.targetAllies = targetAllies; // attack targets allies instead of enemies
+        this.targetDead = targetDead; // attack targets dead people
+        this.actionId = 0;
     }
 }
 
@@ -41,6 +39,7 @@ function getSkill(id) {
     return sSkillList[id];
 }
 
+// Unused
 function attack(source, target) {
     var characterPower = source.strength * random(0.8, 1.2);
     var targetDefense = target.defense * random(0.8, 1.2);

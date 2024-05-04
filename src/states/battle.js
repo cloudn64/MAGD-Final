@@ -29,10 +29,12 @@ class BattleState {
 
         this.chosenSkill = -1; // if -1, this is the "Attack" command.
 
+        this.battleActionQueue = new Array(); // Queue for battle actions from players
+
     }
 
     setupBattle0() { // test battle
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 20, 1)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 399, 1)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 180, 120, 0, 999, 1, 1, 140, 1)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210, 9999, 999, 1, 1, 1, 1)); // add player
         this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1, 1, -999, 1)); // add enemy
@@ -96,7 +98,6 @@ function battleUpdate(state) {
     // battle is running.
     
     // check all characters to update battle information/flags before updating the characters
-    battle.atbWait = false;
     battle.allPlayersDead = true;
     battle.allEnemiesDead = true;
     for (var character = 0; character < battle.characters.length; character++) {
@@ -105,9 +106,6 @@ function battleUpdate(state) {
         if (curCharacter == null) {
             print("ERR null character " + character + " existing in pool");
         } else {
-            if (!curCharacter.dead && curCharacter.isActing == true) {
-                battle.atbWait = true;
-            }
             if (curCharacter.isPlayer && !curCharacter.dead) {
                 battle.allPlayersDead = false;
             } else if (!curCharacter.isPlayer && !curCharacter.dead) {
@@ -238,16 +236,40 @@ function battleUpdate(state) {
             break;
     }
 
+    // Update Battle Actions - This loop won't happen if there aren't any in the queue.
+    // // it technically doesn't make sense for this to be a loop at all since it only updates index 0,
+    // then deletes it, moving index 1 down to index 0.
+    // However, this way it's convenient if I decide they can happen simultaneously.
+    battle.atbWait = false;
+    for (var actionIndex = 0; actionIndex < battle.battleActionQueue.length; actionIndex++) {
+        var battleAction = battle.battleActionQueue[actionIndex];
+        if (battleAction == null) { // this should be impossible
+            print("null battle action destroyed (how did that happen?)");
+            battle.battleActionQueue.shift();
+        } else if (battleAction.isDone) {
+            print("battle action finished");
+            battle.battleActionQueue.shift();
+        } else {
+            //print("update battle action " + actionIndex);
+            battle.atbWait = true;
+            battleAction.update(battleAction); // I don't know why I have to pass battleAction to this function, actually. Getting tired of JavaScript today
+            break;
+        }
+    }
 
+}
+
+function addBattleAction(id, source, target) {
+    battle.battleActionQueue.push(new BattleAction(id, source, target));
 }
 
 // Or attack
 function activateSkill(source, target, skillIndex) {
     source.atbTimer = 0; // Spend the ATB
     if (skillIndex == -1) {
+        addBattleAction(0, source, target);
         print(source.name + " ATTACKING " + target.name);
-        source.setupAttack();
-        target.setupHurt();
+
     } else {
         var skill = source.skills[skillIndex];
         print(source.name + " CASTING " + skill.name + " ON " + target.name);
@@ -260,6 +282,20 @@ function activateDefend(source) {
 
 // This function runs after Update
 function battleDraw(state) {
+
+    // Draw Battle Actions
+    // Still doesn't need to be a loop, check update loop for explanation
+    for (var actionIndex = 0; actionIndex < battle.battleActionQueue.length; actionIndex++) {
+        var battleAction = battle.battleActionQueue[actionIndex];
+        if (battleAction == null) { // this should still be just as impossible as before
+            print("null battle action destroyed (how did that happen?)");
+            battle.battleActionQueue.shift();
+        } else {
+            //print("draw battle action " + actionIndex);
+            battleAction.draw(battleAction); // I don't know why I have to pass battleAction to this function, actually. Getting tired of JavaScript today
+            break;
+        }
+    }
     
     // draw all characters
     for (var character = 0; character < battle.characters.length; character++) {
