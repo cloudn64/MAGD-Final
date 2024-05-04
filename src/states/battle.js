@@ -62,14 +62,14 @@ function getRandomTarget(targetPlayers, targetEnemies) {
 
         if (curCharacter != null && !curCharacter.dead) {
             if (curCharacter.isPlayer && targetPlayers) {
-                print("add player to targetList");
+               // print("add player to targetList");
                 targetList.push(curCharacter);
             } else if (!curCharacter.isPlayer && targetEnemies) {
-                print("add enemy to targetList");
+               // print("add enemy to targetList");
                 targetList.push(curCharacter);
             }
         } else {
-            print("character " + character + " is null and can't be targeted");
+           // print("character " + character + " is null and can't be targeted");
         }
     }
 
@@ -274,7 +274,9 @@ function battleUpdate(state) {
 }
 
 function addBattleAction(id, source, target, skillIndex) {
-    battle.battleActionQueue.push(new BattleAction(id, source, target, skillIndex));
+    if (source.hpTarget > 0) {
+        battle.battleActionQueue.push(new BattleAction(id, source, target, skillIndex));
+    }
 }
 
 function addParticle(x, y, xVel, yVel, life, type, text) {

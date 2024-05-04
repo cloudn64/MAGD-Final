@@ -85,6 +85,10 @@ function attackActionInit(action) {
 
 function attackActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -207,7 +211,7 @@ function genericMagicActionUpdate(action) {
     action.timer++;
     if (action.timer == 20) {
         attackishNoise.play();
-        var damage = action.targetCharacter.applyDamage(magicActionGetPotency(action), action.sourceCharacter.strength);
+        var damage = action.targetCharacter.applyDamage(magicActionGetPotency(action), action.sourceCharacter.magic);
         action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
         addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage);
     }

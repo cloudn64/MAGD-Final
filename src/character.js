@@ -88,7 +88,21 @@ class Character {
         this.atbTimer = 0;
         var target = getRandomTarget(true, false);
         if (target != null) {
-            activateSkill(this, getRandomTarget(true, false), -1);
+            if (random(0, 4) >= 2) { // greater chance to attack
+                activateSkill(this, getRandomTarget(true, false), -1);
+            } else { // magic
+                var randomSkill = (int)(random(0, this.skills.length));
+
+                print("I want skill " + randomSkill + " out of my " + this.skills.length + " skills!");
+                print("That's skill " + this.skills[randomSkill].name);
+                if (randomSkill >= this.skills.length || this.skills[randomSkill].mpCost > this.mp) { // bad skill or unaffordable skill
+                    activateSkill(this, getRandomTarget(true, false), -1);
+                    print("but it's too expensive!");
+                } else {
+                    print("here we go!");
+                    activateSkill(this, getRandomTarget(!this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetAllies), randomSkill);
+                }
+            }
         }
     }
 
