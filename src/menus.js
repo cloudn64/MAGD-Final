@@ -539,11 +539,7 @@ class BattleStatus {
 
     draw() {
         var borderOffset = (this.border) ? this.borderDensity : 0;
-
-        if (!this.showEnemies) {
-            print("hi!");
-        }
-
+        
         if (this.battleState == null) {
             print("Battle state is null?!?!");
             return;

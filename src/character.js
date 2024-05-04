@@ -7,7 +7,7 @@ const sPlayerSkillList = [
 ]
 
 class Character {
-    constructor(isPlayer, ID, name, maxHP, maxMP, str, def, spd, mag) { // ID should be assigned by the battle engine
+    constructor(isPlayer, ID, name, x, y, maxHP, maxMP, str, def, spd, mag) { // ID should be assigned by the battle engine
         this.isPlayer = isPlayer;
         this.name = name;
         this.ID = ID;
@@ -18,8 +18,6 @@ class Character {
         // placeholder stuff
         this.maxHP = maxHP;
         this.maxMP = maxMP;
-        this.x = 0;
-        this.y = 0;
 
         // stats
         this.hp = this.maxHP;
@@ -41,6 +39,17 @@ class Character {
         this.scanned = this.isPlayer; // shows stats when in target menus
 
         this.atbTimer = 0;
+
+        // gfx
+        this.characterGfx = 0;
+        this.animation = new SpriteAnimation("assets/characters/char" + this.characterGfx + "/", 0);
+        this.x = x;
+        this.y = y;
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.rotation = 0;
+
+        this.animation.changeAnim(0, 6, 0.02);
     }
 
     drawSkillMenu() {
@@ -81,6 +90,10 @@ class Character {
             // this.nextSkill
         }
 
+    }
+
+    draw() {
+        this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
     }
 
     debugString(x, y) {

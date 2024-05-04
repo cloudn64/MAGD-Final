@@ -32,10 +32,10 @@ class BattleState {
     }
 
     setupBattle0() { // test battle
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 9999, 999, 1, 1, 20, 1)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 0, 999, 1, 1, 140, 1)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 9999, 999, 1, 1, 1, 1)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 2222, 128, 1, 1, -999, 1)); // add enemy
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 20, 1)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 180, 120, 0, 999, 1, 1, 140, 1)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210, 9999, 999, 1, 1, 1, 1)); // add player
+        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1, 1, -999, 1)); // add enemy
     }
 }
 
@@ -258,21 +258,17 @@ function activateDefend(source) {
 
 // This function runs after Update
 function battleDraw(state) {
-    /*textSize(30);
-    textAlign(LEFT, LEFT);
     
-    battle.characters[0].debugString(20, 20);
+    // draw all characters
+    for (var character = 0; character < battle.characters.length; character++) {
+        var curCharacter = battle.characters[character];
 
-    textAlign(RIGHT, RIGHT);
-
-    battle.characters[1].debugString(width - 20, 20);
-
-    textAlign(LEFT, LEFT);
-    text("atbPaused: " + battle.atbWait + "\nplayersAreDead: " + battle.allPlayersDead + "\nenemiesAreDead: " + battle.allEnemiesDead, 20, height - 80);*/
-
-    //battle.commandMenu.draw();
-
-    //battle.characters[0].drawSkillMenu();
+        if (curCharacter == null) {
+            print("ERR null character " + character + " existing in pool");
+        } else {
+            curCharacter.draw();
+        }
+    }
 
     // draw the battle menu
     updateTargetingMode(); // I am aware this function appears twice, but that's fine
