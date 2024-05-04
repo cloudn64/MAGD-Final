@@ -17,7 +17,7 @@ class BattleState {
         this.allEnemiesDead = true;
 
         this.uiCharacter = -1; // if not -1, this is the ID of the character who is displaying the UI right now
-        this.uiEnemy = -1; // If not -1, this is the ID of the enemy being targeted by the UI right now
+        this.uiEnemy = -1; // If not -1, this is the ID of the character being targeted by the UI right now (enemy is slightly misleading)
         this.uiPage = 0; // page 0 is the basic commands, page 1 is the skill menu, page 2 is the target menu
         this.statusMenu = new BattleStatus(210, height - 159, width - 211, 158, this);
         this.targetMenu = new BattleStatus(210, height - 159, width - 211, 158, this);
@@ -163,7 +163,12 @@ function battleUpdate(state) {
             battle.buttonFour.disabled = true;
             if (battle.uiCharacter != -1) {
                 battle.characters[battle.uiCharacter].skillMenu.menu.highlightedOption = -1;
-                if (battle.skillButton.click || battle.skillButton.hold) {
+                if (battle.defendButton.click) {
+                    activateDefend(battle.characters[battle.uiCharacter]);
+                    battle.uiPage = 0;
+                    battle.chosenSkill = -1;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.skillButton.click || battle.skillButton.hold) {
                     battle.uiPage = 1;
                     battle.targetMenu.selectedOption = -1;
                 } else if (battle.attackButton.click || battle.attackButton.hold) {
@@ -183,7 +188,12 @@ function battleUpdate(state) {
                     battle.uiPage = 2;
                     battle.targetMenu.selectedOption = -1;
                 }
-                if (battle.attackButton.click || battle.attackButton.hold) {
+                if (battle.defendButton.click) {
+                    activateDefend(battle.characters[battle.uiCharacter]);
+                    battle.uiPage = 0;
+                    battle.chosenSkill = -1;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.attackButton.click || battle.attackButton.hold) {
                     battle.chosenSkill = -1;
                     battle.uiPage = 2;
                     battle.targetMenu.selectedOption = -1;
@@ -198,7 +208,17 @@ function battleUpdate(state) {
             battle.buttonFour.disabled = false;
             if (battle.uiCharacter != -1) {
                 battle.characters[battle.uiCharacter].skillMenu.menu.highlightedOption = -1;
-                if (battle.skillButton.click || battle.skillButton.hold) {
+                if (battle.uiEnemy != -1) {
+                    activateSkill(battle.characters[battle.uiCharacter], battle.characters[battle.uiEnemy], battle.chosenSkill);
+                    battle.chosenSkill = -1;
+                    battle.uiPage = 0;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.defendButton.click) {
+                    activateDefend(battle.characters[battle.uiCharacter]);
+                    battle.uiPage = 0;
+                    battle.chosenSkill = -1;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.skillButton.click || battle.skillButton.hold) {
                     battle.uiPage = 1;
                     battle.targetMenu.selectedOption = -1;
                 } else if (battle.attackButton.click || battle.attackButton.hold) {
@@ -219,6 +239,21 @@ function battleUpdate(state) {
     }
 
 
+}
+
+// Or attack
+function activateSkill(source, target, skillIndex) {
+    source.atbTimer = 0; // Spend the ATB
+    if (skillIndex == -1) {
+        print(source.name + " ATTACKING " + target.name);
+    } else {
+        var skill = source.skills[skillIndex];
+        print(source.name + " CASTING " + skill.name + " ON " + target.name);
+    }
+}
+
+function activateDefend(source) {
+    source.atbTimer = 0; // Spend the ATB
 }
 
 // This function runs after Update

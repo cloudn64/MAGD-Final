@@ -37,6 +37,7 @@ class Character {
         }
 
         this.dead = false;
+        this.defending = false;
 
         this.atbTimer = 0;
     }
@@ -67,6 +68,7 @@ class Character {
 
         if (this.atbTimer >= (ATB_MAX - this.speed)) { // you can attack now (unless the global ATB is paused)
             this.isReadyToAct = true;
+            this.defending = false;
         }
 
         if (this.isActing) { // update the current action, it has already started
