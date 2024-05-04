@@ -58,10 +58,8 @@ class Button {
         // Special cosmetic fields
         this.font = null; // If not null, uses this font for the text
         this.image = null; // If not null, uses this image instead of a rectangle (still colors it with above colors)
-        this.highlightSfx = null; // If not null, uses this sound when the button is highlighted
-        this.pressSfx = null; // If not null, uses this sound when the button is pressed
+
         this.releaseSfx = null; // If not null, uses this sound when the button is released
-        this.unavailableSfx = null; // If not null, uses this sound when the disabled button is pressed
 
         // Shadows
         this.buttonDropShadow = true;
@@ -73,6 +71,7 @@ class Button {
 
         this.disabled = false; // If true, this makes the button unusable and uses the "unavailable" colors
         this.ignore = false; // If true, the button doesn't work at all.
+        this.noiseFlag = false; // Because I can
     }
 
     // Updates the button states
@@ -92,10 +91,13 @@ class Button {
         this.highlight = false;
         if (mouseX > (this.x - thickness - xOffset) && mouseX < (this.x + this.width + thickness - xOffset) &&
             mouseY > (this.y - thickness - yOffset) && mouseY < (this.y + this.height + thickness - yOffset)) {
-                if (this.highightSfx != null) {
-                    this.highlightSfx.play(); // assumes this is a sound and tries to play it
+                if (!this.noiseFlag) {
+                    optCycleNoise.play(); // assumes this is a sound and tries to play it
+                    this.noiseFlag = true;
                 }
                 this.highlight = true;
+        } else {
+            this.noiseFlag = false;
         }
 
         if (this.highlight) {
@@ -103,10 +105,10 @@ class Button {
                 this.release = false; // you're pushing the button so you're not releasing it.
                 if (!this.click && !this.hold) { // If not click or hold, set click
                     this.click = true;
-                    if (!this.disabled && this.clickSfx != null) {
-                        this.clickSfx.play(); // assumes this is a sound and tries to play it
-                    } else if (this.disabled && this.unavailableSfx != null) {
-                        this.unavailableSfx.play(); // assumes this is a sound and tries to play it
+                    if (!this.disabled) {
+                        optChooseNoise.play(); // assumes this is a sound and tries to play it
+                    } else {
+                        optNoNoise.play(); // assumes this is a sound and tries to play it
                     }
                 } else if (this.click && !this.hold) { // If click but not hold, click is two frames, change to hold
                     this.click = false;
@@ -279,7 +281,6 @@ class Menu {
         this.scrollDelta = 0;
         this.scrollSpeed = 0.001;
 
-        this.highlightSfx = null; // If not null, uses this sound when the button is highlighted
         this.pressSfx = null; // If not null, uses this sound when the button is pressed
         this.releaseSfx = null; // If not null, uses this sound when the button is released
         this.unavailableSfx = null; // If not null, uses this sound when the disabled button is pressed
@@ -390,10 +391,10 @@ class Menu {
                 this.release = false; // you're pushing the button so you're not releasing it.
                 if (!this.click && !this.hold) { // If not click or hold, set click
                     this.click = true;
-                    if ((this.options[this.highlightedOption].available) && this.clickSfx != null) {
-                        this.clickSfx.play(); // assumes this is a sound and tries to play it
-                    } else if ((!this.options[this.highlightedOption].available) && this.unavailableSfx != null) {
-                        this.unavailableSfx.play(); // assumes this is a sound and tries to play it
+                    if ((this.options[this.highlightedOption].available)) {
+                        optChooseNoise.play(); // assumes this is a sound and tries to play it
+                    } else if ((!this.options[this.highlightedOption].available)) {
+                        optNoNoise2.play(); // assumes this is a sound and tries to play it
                     }
                 } else if (this.click && !this.hold) { // If click but not hold, click is two frames, change to hold
                     this.click = false;
@@ -490,7 +491,6 @@ class BattleStatus {
         this.hold = false;
         this.draggedOff = false; // flag for misbehaving by dragging the held mouse onto another button
 
-        this.highlightSfx = null; // If not null, uses this sound when the button is highlighted
         this.pressSfx = null; // If not null, uses this sound when the button is pressed
         this.releaseSfx = null; // If not null, uses this sound when the button is released
         this.unavailableSfx = null; // If not null, uses this sound when the disabled button is pressed
@@ -539,7 +539,7 @@ class BattleStatus {
 
     draw() {
         var borderOffset = (this.border) ? this.borderDensity : 0;
-        
+
         if (this.battleState == null) {
             print("Battle state is null?!?!");
             return;
@@ -756,14 +756,10 @@ class BattleStatus {
                     if ((characterIsHighlighted && (this.targetDead || !highlightedCharacter.dead) && (this.targetATB || characterAtbReady))) { // not dead and ATB ready (ATB is ignored in target mode)
                         this.selectedOption = this.highlightedOption;
                         print("I clicked a character");
-                        if (this.clickSfx != null) {
-                            this.clickSfx.play(); // assumes this is a sound and tries to play it
-                        }
+                        optChooseNoise.play();
                     } else if (characterIsHighlighted) { 
                         print("this one's not ready boss (or they are dead, oh noes)");
-                        if (this.unavailableSfx != null) {
-                            this.unavailableSfx.play(); // assumes this is a sound and tries to play it
-                        }
+                        optNoNoise2.play();
                     }
                 } else if (this.click && !this.hold) { // If click but not hold, click is two frames, change to hold
                     this.click = false;

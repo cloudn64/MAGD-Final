@@ -30,6 +30,7 @@ class BattleState {
         this.chosenSkill = -1; // if -1, this is the "Attack" command.
 
         this.battleActionQueue = new Array(); // Queue for battle actions from players
+        this.particleQueue = new Array();
 
     }
 
@@ -37,7 +38,7 @@ class BattleState {
         this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 399, 1)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 180, 120, 0, 999, 1, 1, 140, 1)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210, 9999, 999, 1, 1, 1, 1)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1, 1, -999, 1)); // add enemy
+        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1000, 1, 199, 1)); // add enemy
     }
 }
 
@@ -59,7 +60,7 @@ function getRandomTarget(targetPlayers, targetEnemies) {
     for (var character = 0; character < battle.characters.length; character++) {
         var curCharacter = battle.characters[character];
 
-        if (curCharacter != null) {
+        if (curCharacter != null && !curCharacter.dead) {
             if (curCharacter.isPlayer && targetPlayers) {
                 print("add player to targetList");
                 targetList.push(curCharacter);
@@ -96,6 +97,15 @@ function updateTargetingMode() {
 // This function runs before Draw
 function battleUpdate(state) {
     // battle is running.
+
+    // update particles
+    // unlike the meaningless loop for the battle actions, this loop actually has a reason to exist
+    for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
+        var particle = battle.particleQueue[particleIndex];
+        if (particle.update()) {
+            battle.particleQueue.splice(particleIndex, 1);
+        }
+    }
     
     // check all characters to update battle information/flags before updating the characters
     battle.allPlayersDead = true;
@@ -120,16 +130,16 @@ function battleUpdate(state) {
 
         if (curCharacter == null) {
             print("ERR null character " + character + " existing in pool");
-        } else if (curCharacter.dead == true) {
+        } /*else if (curCharacter.dead == true) {
             //print("character " + character + " is dead");
-        } else {
+        } */else {
             curCharacter.update(battle.atbWait);
         }
     }
 
     // UI
     var statusChosen = battle.statusMenu.getChosen();
-    if (statusChosen == -1) {
+    if (statusChosen == -1 || battle.allPlayersDead || battle.allEnemiesDead) {
         battle.uiPage = 0;
         battle.uiCharacter = -1;
         battle.attackButton.disabled = true;
@@ -257,32 +267,41 @@ function battleUpdate(state) {
         }
     }
 
+    if (battle.allPlayersDead || battle.allEnemiesDead) {
+        battle.atbWait = true;
+    }
+
 }
 
-function addBattleAction(id, source, target) {
-    battle.battleActionQueue.push(new BattleAction(id, source, target));
+function addBattleAction(id, source, target, skillIndex) {
+    battle.battleActionQueue.push(new BattleAction(id, source, target, skillIndex));
+}
+
+function addParticle(x, y, xVel, yVel, life, type, text) {
+    battle.particleQueue.push(new Particle(x, y, xVel, yVel, life, type, text));
 }
 
 // Or attack
 function activateSkill(source, target, skillIndex) {
     source.atbTimer = 0; // Spend the ATB
     if (skillIndex == -1) {
-        addBattleAction(0, source, target);
+        addBattleAction(0, source, target, -1);
         print(source.name + " ATTACKING " + target.name);
 
     } else {
         var skill = source.skills[skillIndex];
+        addBattleAction(skill.actionId, source, target, skillIndex);
         print(source.name + " CASTING " + skill.name + " ON " + target.name);
     }
 }
 
 function activateDefend(source) {
     source.atbTimer = 0; // Spend the ATB
+    source.defending = true;
 }
 
 // This function runs after Update
 function battleDraw(state) {
-
     // Draw Battle Actions
     // Still doesn't need to be a loop, check update loop for explanation
     for (var actionIndex = 0; actionIndex < battle.battleActionQueue.length; actionIndex++) {
@@ -307,6 +326,14 @@ function battleDraw(state) {
             curCharacter.draw();
         }
     }
+
+    // draw particles
+    // unlike the meaningless loop for the battle actions, this loop actually has a reason to exist
+    for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
+        var particle = battle.particleQueue[particleIndex];
+        particle.draw();
+    }
+
 
     // draw the battle menu
     updateTargetingMode(); // I am aware this function appears twice, but that's fine

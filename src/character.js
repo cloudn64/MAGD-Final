@@ -43,6 +43,7 @@ class Character {
         this.dead = false;
         this.defending = false;
         this.scanned = this.isPlayer; // shows this character's stats in menus. If false, only their name will appear.
+        this.scanned = true; // TEMP
 
         // ATB Timer
         this.atbTimer = 0;
@@ -65,7 +66,15 @@ class Character {
     }
 
     defaultAnim() {
-        this.animation.changeAnim(0, 6, 0.02, true);
+        if (!this.dead) {
+            this.animation.changeAnim(0, 6, 0.02, true);
+        }
+    }
+
+    defendAnim() {
+        if (!this.dead) {
+            this.animation.changeAnim(5, 0, 0.0, false);
+        }
     }
 
     drawSkillMenu() {
@@ -74,8 +83,19 @@ class Character {
         }
     }
 
+    // for the enemies
+    pickRandomSkill() {
+        this.atbTimer = 0;
+        var target = getRandomTarget(true, false);
+        if (target != null) {
+            activateSkill(this, getRandomTarget(true, false), -1);
+        }
+    }
+
     update(atbIsPaused) {
+        var atbIsFull = this.atbTimer >= (ATB_MAX - this.speed);
         if (this.dead) {
+            this.animation.changeAnim(3, 0, 0.0, false);
             this.atbTimer = 0;
             this.isActing = false;
             this.isReadyToAct = false;
@@ -84,7 +104,6 @@ class Character {
 
         if (this.hp <= 0) {
             this.hp = 0;
-            this.animation.changeAnim(3, 0, 0.0, false);
             this.dead = true;
             return;
         }
@@ -107,9 +126,15 @@ class Character {
             this.atbTimer = constrain(this.atbTimer + 1, 0, ATB_MAX - this.speed);
         }
 
-        if (this.atbTimer >= (ATB_MAX - this.speed)) { // you can attack now (unless the global ATB is paused)
-            this.isReadyToAct = true;
+        if (!atbIsFull && this.defending && !this.dead) {
+            this.defendAnim();
+        } else if ((this.defending && atbIsFull) || this.dead) {
             this.defending = false;
+            this.defaultAnim();
+        }
+
+        if (!this.isPlayer && atbIsFull) {
+            this.pickRandomSkill();
         }
 
         // Unused attacking logic prior to genius invention of Battle Action
@@ -137,7 +162,10 @@ class Character {
         var defenseNullifier = (random(1.0, 1.2) + (this.defense / 50));
         var attackDamage = (int)(constrain(((amount * powerBonus) / defenseNullifier), 1, 9999));
 
+        if (this.defending) attackDamage = (int)(attackDamage / 2); // cut damage in half if defending
+
         this.hpTarget = constrain(this.hpTarget - attackDamage, 0, this.maxHP);
+        return attackDamage;
     }
 
     applyMagic(amount) {

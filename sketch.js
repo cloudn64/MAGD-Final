@@ -2,7 +2,15 @@ var gamestate;
 var highscores;
 
 function preload() {
-  //testFont = loadFont('assets/fonts/animeace2_reg.otf');
+  optCycleNoise = loadSound("assets/sounds/cycleNoise.wav");
+  optChooseNoise = loadSound("assets/sounds/selectNoise.wav");
+  optNoNoise = loadSound("assets/sounds/noNoise.wav");
+  optNoNoise2 = loadSound("assets/sounds/noNoise2.wav");
+  attackishNoise = loadSound("assets/sounds/attackishNoise.wav");
+  dashNoise = loadSound("assets/sounds/dash.wav");
+  attackishNoise3 = loadSound("assets/sounds/attackishNoise3.wav");
+
+
 }
 
 function setup() {

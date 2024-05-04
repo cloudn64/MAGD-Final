@@ -3,23 +3,23 @@ const TEST_SKILL = 0;
 var sSkillList = [];
 
 class Skill {
-    constructor(name, desc, potency, mpCost, targetAllies, targetDead, atk, upd, drw) {
+    constructor(name, desc, actionId, potency, mpCost, targetAllies, targetDead, atk, upd, drw) {
         this.name = name; // name of the attack, not used in the description, but used for buttons and overhead info.
         this.description = desc; // example: "(name) threw a rock!" "(name) charged up his power!"
         this.potency = potency;
         this.mpCost = mpCost;
         this.targetAllies = targetAllies; // attack targets allies instead of enemies
         this.targetDead = targetDead; // attack targets dead people
-        this.actionId = 0;
+        this.actionId = actionId;
     }
 }
 
 // there's got to be a better way to do this but I'm not going to bother with it
 function populateGlobalSkillList() {
     sSkillList = [];
-    sSkillList.push(new Skill("Test Skill", "Test Skill for Testing Purposes", 2, 30, false, false, null, null, null)); // TEST_SKILL
-    sSkillList.push(new Skill("Test Skill II", "Test Skill but Expensive", 2, 6000, false, false, null, null, null)); // TEST_SKILL
-    sSkillList.push(new Skill("Test Life", "Test Life Spell", 2, 92, true, true, null, null, null)); // TEST_SKILL
+    sSkillList.push(new Skill("Fire", "Burn the opponent with very funny flames!", 2, 300, 30, false, false, null, null, null)); // TEST_SKILL
+    sSkillList.push(new Skill("Test Skill II", "Test Skill but Expensive", 1, 2, 6000, false, false, null, null, null)); // TEST_SKILL
+    sSkillList.push(new Skill("Test Life", "Test Life Spell", 2, 2, 92, true, true, null, null, null)); // TEST_SKILL
 }
 
 function skillListToSkills(skillList) {
