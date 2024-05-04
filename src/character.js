@@ -3,7 +3,7 @@ const ATB_MAX = 400;
 const sPlayerSkillList = [
     0,
     1,
-    0,
+    2,
 ]
 
 class Character {
@@ -33,7 +33,7 @@ class Character {
 
         this.skillMenu = null;
         if (this.isPlayer) {
-            this.skillMenu = new SkillMenu(this, this.skills, 210, height - 159, width - 211, 158, 20, 12);
+            this.skillMenu = new SkillMenu(this, this.skills, 210, height - 159, width - 211, 158, 17, 8);
         }
 
         this.dead = false;
@@ -52,6 +52,13 @@ class Character {
             this.atbTimer = 0;
             this.isActing = false;
             this.isReadyToAct = false;
+            return;
+        }
+
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this.dead = true;
+            return;
         }
 
         if (!atbIsPaused && !this.isActing) { // update ATB if not doing an attack and the global ATB pause flag is not set

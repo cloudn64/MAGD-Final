@@ -197,6 +197,7 @@ class Button {
         if (this.font != null) {
             textFont(this.font); // assumes this is a font and uses it
         }
+
         textSize(this.textSize); // set text size
         textAlign(this.textAlignX, this.textAlignY); // sets text alignment
 
@@ -299,7 +300,7 @@ class Menu {
     }
 
     getChosen() {
-        if (this.click || this.hold && !this.draggedOff && this.highlightedOption == this.prevHighlightedOption) {
+        if ((this.click || this.hold) && !this.draggedOff && this.highlightedOption == this.prevHighlightedOption && (this.options[this.highlightedOption].available == true)) {
             return this.highlightedOption;
         }
         return -1;
@@ -437,6 +438,10 @@ class SkillMenu {
         }
     }
 
+    getChosen() {
+        return this.menu.getChosen();
+    }
+
     draw() {
         for (var skill = 0; skill < this.skills.length; skill++) {
             var thisSkill = this.skills[skill];
@@ -453,6 +458,8 @@ class SkillMenu {
 // the HP and MP of characters in your party. I haven't decided if I want to support there being more than one party member yet.
 // This is obviously built off of the menu class, and if I had more foresight, they would probably be the same thing.
 // Here we are, though.
+// if 'showEnemies' is true, this will instead show the enemy stats.
+// if 'targetATB' is true, this will be a target selection interface instead of a status menu
 class BattleStatus {
     constructor(x, y, width, height, battle) {
         this.x = x;
@@ -489,15 +496,20 @@ class BattleStatus {
         this.unavailableSfx = null; // If not null, uses this sound when the disabled button is pressed
 
         this.nameTextSize = 15;
-        this.hpMpTextSize = 15;
+        this.hpMpTextSize = 9;
 
-        this.maxCharacters = 4;
+        this.maxCharacters = 3;
         this.optCharacterIndex = [this.maxCharacters];
 
         this.selectedOption = -1; // currently selected
 
         this.selectAlphaWave = 0; // a sine wave for the alpha of the selected option
         this.selectAlphaAngle = 0; // not actually an angle, but is named "angle" because it's being used in sine
+
+        this.showEnemies = false; // false if this menu shows players, true if it shows enemies.
+        this.noSuitableChoice = false; // Disables suitable choice logic with ATB
+        this.targetATB = false; // Allows you to target people without their ATB being full
+        this.targetDead = false; // Allows you to target dead people
     }
 
     // function checks if the mouse is in the area within the menu's local boundaries.
@@ -518,8 +530,19 @@ class BattleStatus {
         return this.selectedOption;
     }
 
+    setupTargetingMode(enemies, allowDead) {
+        this.targetATB = true;
+        this.noSuitableChoice = true;
+        this.showEnemies = enemies;
+        this.targetDead = allowDead;
+    }
+
     draw() {
         var borderOffset = (this.border) ? this.borderDensity : 0;
+
+        if (!this.showEnemies) {
+            print("hi!");
+        }
 
         if (this.battleState == null) {
             print("Battle state is null?!?!");
@@ -530,9 +553,23 @@ class BattleStatus {
         }
 
         if (this.selectedOption != -1) {
-            this.selectAlphaWave = ((sin(this.selectAlphaAngle++ / 20) + 1) * 20);
+            this.selectAlphaWave = ((sin(this.selectAlphaAngle++ / 20) + 1.5) * 20);
         } else {
             this.selectAlphaWave = 0;
+        }
+
+        /*  PRE-EMPTIVE INFORMATION  */
+        this.maxCharacters = 0;
+        for (var e = 0; e < this.battleState.characters.length; e++) {
+            var thisCharacter = this.battleState.characters[e];
+
+            if (thisCharacter != null && thisCharacter.isPlayer != this.showEnemies) {
+                this.maxCharacters++;
+            }
+        }
+
+        if (this.maxCharacters < 4) {
+            this.maxCharacters = 4;
         }
 
         /*  MENU CONTROL  */
@@ -564,11 +601,11 @@ class BattleStatus {
             var bWidth = this.menuGraphics.width;
             var bX = 0;
             var bHeight = this.menuGraphics.height / this.maxCharacters;
-            var bY = (i * this.menuGraphics.height / this.maxCharacters);
+            var bY = (charactersParsed * this.menuGraphics.height / this.maxCharacters);
 
             if (charactersParsed >= this.maxCharacters) {
                 break;
-            } else if (thisCharacter == null/* || thisCharacter.isPlayer == false*/) { // UNCOMMENT THIS!
+            } else if (thisCharacter == null || thisCharacter.isPlayer == this.showEnemies) {
                 continue;
             } else {
                 this.optCharacterIndex[charactersParsed] = i;
@@ -577,8 +614,8 @@ class BattleStatus {
 
             // Highlight
             if (this.mouseAtLocal(bX, bY, bWidth, bHeight) && this.highlightedOption == -1) {
-                this.highlightedOption = i;
-                if (thisCharacter.dead && (this.prevHighlightedOption == this.highlightedOption) && (this.click || this.hold)) {
+                this.highlightedOption = (charactersParsed - 1);
+                if (!thisCharacter.dead && (thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed)) && (this.prevHighlightedOption == this.highlightedOption) && (this.click || this.hold)) {
                     this.menuGraphics.fill(this.downButtonColor);
                 } else {
                     this.menuGraphics.fill(this.highlightedButtonColor);
@@ -604,7 +641,7 @@ class BattleStatus {
             this.menuGraphics.fill(255 - (atbBarFill * 255), (atbBarFill * 255), 0, 255);
             this.menuGraphics.rect(bX + 8, atbBarHeight - (atbBarFill * atbBarHeight) + bY + atbBarScale, 6, atbBarFill * atbBarHeight);
 
-
+            // Name and HP text color
             if (thisCharacter.dead) { // you are dead
                 this.menuGraphics.fill(this.deadTextColor);
             } else if (thisCharacter.hp < (thisCharacter.maxHP / 10)) { // you have less than a tenth of your health
@@ -613,13 +650,43 @@ class BattleStatus {
                 this.menuGraphics.fill(this.textColor);
             }
 
+            var textOffset = 30;
+
             this.menuGraphics.textSize(this.nameTextSize);
             this.menuGraphics.textAlign(LEFT, CENTER);
             // name text
-            this.menuGraphics.text(thisCharacter.name, bX + 20, bY + (bHeight / 2));
-            this.menuGraphics.textSize(this.mpTextSize);
-            //this.menuGraphics.textAlign(RIGHT, BOTTOM);
-            //this.menuGraphics.text(this.options[i].cost, bX + bWidth, bY + bHeight);
+            this.menuGraphics.text(thisCharacter.name, bX + textOffset, bY + (bHeight / 2));
+
+            var statsOffset = 110;
+            var barLength = 300;
+            var textSpaceCut = bHeight / (this.hpMpTextSize * 0.5);
+
+            this.menuGraphics.textSize(this.hpMpTextSize);
+            // HP Text and Bar
+            this.menuGraphics.text(thisCharacter.hp + "/" + thisCharacter.maxHP + "HP", bX + statsOffset, bY + (textSpaceCut));
+            this.menuGraphics.fill('#222222CC');
+            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
+            var hpBarFill = (thisCharacter.hp / (thisCharacter.maxHP)) * barLength;
+            this.menuGraphics.fill('#00FF00FF');
+            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), hpBarFill, textSpaceCut / 2); // full bar
+
+
+            // MP text color
+            if (thisCharacter.dead || thisCharacter.mp == 0) { // you are dead or you have 0 MP
+                this.menuGraphics.fill(this.deadTextColor);
+            } else if (thisCharacter.mp < (thisCharacter.maxMP / 10)) { // you have less than a tenth of your MP
+                this.menuGraphics.fill(this.unhealthyTextColor);
+            } else {
+                this.menuGraphics.fill(this.textColor);
+            }
+
+            // MP
+            this.menuGraphics.text(thisCharacter.mp + "/" + thisCharacter.maxMP + "MP", bX + statsOffset, bY + (textSpaceCut * 3));
+            this.menuGraphics.fill('#222222CC');
+            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 4) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
+            var mpBarFill = (thisCharacter.mp / (thisCharacter.maxMP)) * barLength;
+            this.menuGraphics.fill('#FF33FFFF');
+            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 4) - (textSpaceCut / 2), mpBarFill, textSpaceCut / 2); // full bar
         }
 
         /*  MENU DRAW  */
@@ -638,18 +705,18 @@ class BattleStatus {
                 this.selectedOption = -1;
             } else {
                 var selectedCharacter = this.battleState.characters[this.optCharacterIndex[this.selectedOption]];
-                if ((selectedCharacter.atbTimer < (ATB_MAX - selectedCharacter.speed)) || selectedCharacter.dead) { // Don't select character with not ready ATB or dead character
+                if ((!this.targetATB && (selectedCharacter.atbTimer < (ATB_MAX - selectedCharacter.speed))) || (!this.targetDead && selectedCharacter.dead)) { // Don't select character with not ready ATB or dead character (ATB is ignored for target mode)
                     this.selectedOption = -1;
                 }
             }
         }
 
-        // suitable choice logic (attempt to select a character automatically if a suitable one exists)
-        if (this.selectedOption == -1) {
+        // suitable choice logic (attempt to select a character automatically if a suitable one exists. Does not do this in target mode)
+        if (this.selectedOption == -1 && !this.noSuitableChoice) {
             for (var c = 0; c < this.maxCharacters; c++) {
                 if (this.optCharacterIndex[c] != -1) {
                     var thisCharacter = this.battleState.characters[this.optCharacterIndex[c]];
-                    if (thisCharacter != null && !thisCharacter.dead && (thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed))) {
+                    if (thisCharacter != null && (this.targetDead || !thisCharacter.dead) && (this.targetATB || thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed))) { // ATB is ignored in target mode
                         this.selectedOption = c;
                     }
                 }
@@ -665,13 +732,18 @@ class BattleStatus {
             highlightedCharacter = this.battleState.characters[this.optCharacterIndex[this.highlightedOption]]; // should be confirmed not null by the earlier loop
             if (highlightedCharacter == null) {
                 print("I'm null, why?");
-                this.highlightedOption = -1;
+                this.highlightedOption = this.prevHighlightedOption = -1;
             } else {
                 characterIsHighlighted = true;
                 if (highlightedCharacter.atbTimer >= (ATB_MAX - highlightedCharacter.speed)) characterAtbReady = true;
             }
         } else {
-            this.highlightedOption = -1;
+            if (this.highlightedOption == -1) {
+                //print("I'm not real or something, why?");
+            } else {
+                print("optCharacterIndex isn't even real?? idx " + this.highlightedOption);
+            }
+            this.highlightedOption = this.prevHighlightedOption = -1;
         }
 
         if (this.highlightedOption != -1 && !this.draggedOff) {
@@ -679,13 +751,13 @@ class BattleStatus {
                 this.release = false; // you're pushing the button so you're not releasing it.
                 if (!this.click && !this.hold) { // If not click or hold, set click
                     this.click = true;
-                    if ((characterIsHighlighted && !highlightedCharacter.dead && characterAtbReady)) { // not dead and ATB ready
+                    if ((characterIsHighlighted && (this.targetDead || !highlightedCharacter.dead) && (this.targetATB || characterAtbReady))) { // not dead and ATB ready (ATB is ignored in target mode)
                         this.selectedOption = this.highlightedOption;
                         print("I clicked a character");
                         if (this.clickSfx != null) {
                             this.clickSfx.play(); // assumes this is a sound and tries to play it
                         }
-                    } else if ((characterIsHighlighted && (highlightedCharacter.dead || !characterAtbReady))) { // dead or not ATB ready
+                    } else if (characterIsHighlighted) { 
                         print("this one's not ready boss (or they are dead, oh noes)");
                         if (this.unavailableSfx != null) {
                             this.unavailableSfx.play(); // assumes this is a sound and tries to play it

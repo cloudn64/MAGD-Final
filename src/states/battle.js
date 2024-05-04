@@ -16,19 +16,26 @@ class BattleState {
         this.allPlayersDead = true;
         this.allEnemiesDead = true;
 
-        this.uiCharacter = 0; // if not -1, this is the ID of the character who is displaying the UI right now
+        this.uiCharacter = -1; // if not -1, this is the ID of the character who is displaying the UI right now
+        this.uiEnemy = -1; // If not -1, this is the ID of the enemy being targeted by the UI right now
         this.uiPage = 0; // page 0 is the basic commands, page 1 is the skill menu, page 2 is the target menu
         this.statusMenu = new BattleStatus(210, height - 159, width - 211, 158, this);
-        this.attackButton = newButton("Attack", 5, height - 155, 200, 30, LEFT, LEFT);
-        this.skillButton = newButton("Magic", 5, height - 115, 200, 30, LEFT, LEFT);
-        this.defendButton = newButton("Defend", 5, height - 75, 200, 30, LEFT, LEFT);
-        this.buttonFour = newButton("Item", 5, height - 35, 200, 30, LEFT, LEFT);
+        this.targetMenu = new BattleStatus(210, height - 159, width - 211, 158, this);
+
+        this.attackButton = newButton("Attack", 5, height - 155, 200, 30, 15, LEFT, LEFT);
+        this.skillButton = newButton("Magic", 5, height - 115, 200, 30, 15, LEFT, LEFT);
+        this.defendButton = newButton("Defend", 5, height - 75, 200, 30, 15, LEFT, LEFT);
+        this.buttonFour = newButton("Return", 5, height - 35, 200, 30, 15, LEFT, LEFT);
+
+        this.chosenSkill = -1; // if -1, this is the "Attack" command.
 
     }
 
     setupBattle0() { // test battle
         this.characters.push(new Character(true,  this.characterTotal++, "Hero", 9999, 999, 1, 1, 20, 1)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 2222, 128, 1, 1, 90, 1)); // add enemy
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 0, 999, 1, 1, 140, 1)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 9999, 999, 1, 1, 1, 1)); // add player
+        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 2222, 128, 1, 1, -999, 1)); // add enemy
     }
 }
 
@@ -70,6 +77,20 @@ function getRandomTarget(targetPlayers, targetEnemies) {
     }
 }
 
+function updateTargetingMode() {
+    if (battle.uiCharacter != -1) {
+        if (battle.chosenSkill != -1) { // magic
+            //print("MAGIC");
+            var curSkill = battle.characters[battle.uiCharacter].skills[battle.chosenSkill];
+            battle.targetMenu.setupTargetingMode(!curSkill.targetAllies, curSkill.targetDead);
+        } else {
+            battle.targetMenu.setupTargetingMode(true, false);
+        }
+    } else {
+        battle.targetMenu.setupTargetingMode(true, false);
+    }
+}
+
 // This function runs before Draw
 function battleUpdate(state) {
     // battle is running.
@@ -102,27 +123,99 @@ function battleUpdate(state) {
         if (curCharacter == null) {
             print("ERR null character " + character + " existing in pool");
         } else if (curCharacter.dead == true) {
-            print("character " + character + " is dead");
+            //print("character " + character + " is dead");
         } else {
             curCharacter.update(battle.atbWait);
         }
     }
 
     // UI
-    if (battle.uiCharacter != -1 && battle.characters[battle.uiCharacter] != null) {
-        
-        switch (battle.uiPage) {
-            case 0: // command menu
-                battle.attackButton.update();
-                battle.skillButton.update();
-                battle.defendButton.update();
-                battle.buttonFour.update();
-                break;
-            case 1: // skill (magic) menu
-                break;
-            case 2: // target menu
-                break;
-        }
+    var statusChosen = battle.statusMenu.getChosen();
+    if (statusChosen == -1) {
+        battle.uiPage = 0;
+        battle.uiCharacter = -1;
+        battle.attackButton.disabled = true;
+        battle.skillButton.disabled = true;
+        battle.defendButton.disabled = true;
+    } else {
+        battle.uiCharacter = battle.statusMenu.optCharacterIndex[statusChosen];
+        battle.attackButton.disabled = false;
+        battle.skillButton.disabled = false;
+        battle.defendButton.disabled = false;
+    }
+
+    var enemyChosen = battle.targetMenu.getChosen();
+    if (enemyChosen == -1) {
+        battle.uiEnemy = -1;
+    } else {
+        battle.uiEnemy = battle.targetMenu.optCharacterIndex[enemyChosen];
+    }
+
+    battle.attackButton.update();
+    battle.skillButton.update();
+    battle.defendButton.update();
+    battle.buttonFour.update();
+
+    updateTargetingMode(); // I am aware that this function is called twice
+
+    switch (battle.uiPage) {
+        case 0: // command menu
+            battle.buttonFour.disabled = true;
+            if (battle.uiCharacter != -1) {
+                battle.characters[battle.uiCharacter].skillMenu.menu.highlightedOption = -1;
+                if (battle.skillButton.click || battle.skillButton.hold) {
+                    battle.uiPage = 1;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.attackButton.click || battle.attackButton.hold) {
+                    battle.chosenSkill = -1;
+                    battle.uiPage = 2;
+                    battle.targetMenu.selectedOption = -1;
+                }
+            }
+            break;
+        case 1: // skill (magic) menu
+            battle.buttonFour.disabled = false;
+            if (battle.uiCharacter != -1) {
+                var selection = battle.characters[battle.uiCharacter].skillMenu.getChosen();
+                if (selection != null && selection != -1) {
+                    print("select " + selection);
+                    battle.chosenSkill = selection;
+                    battle.uiPage = 2;
+                    battle.targetMenu.selectedOption = -1;
+                }
+                if (battle.attackButton.click || battle.attackButton.hold) {
+                    battle.chosenSkill = -1;
+                    battle.uiPage = 2;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.buttonFour.click) {
+                    battle.chosenSkill = -1;
+                    battle.uiPage = 0;
+                    battle.targetMenu.selectedOption = -1;
+                }
+            }
+            break;
+        case 2: // target menu
+            battle.buttonFour.disabled = false;
+            if (battle.uiCharacter != -1) {
+                battle.characters[battle.uiCharacter].skillMenu.menu.highlightedOption = -1;
+                if (battle.skillButton.click || battle.skillButton.hold) {
+                    battle.uiPage = 1;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.attackButton.click || battle.attackButton.hold) {
+                    battle.chosenSkill = -1;
+                    battle.uiPage = 2;
+                    battle.targetMenu.selectedOption = -1;
+                } else if (battle.buttonFour.click) {
+                    if (battle.chosenSkill != -1) {
+                        battle.uiPage = 1;
+                    } else {
+                        battle.uiPage = 0;
+                    }
+                    battle.chosenSkill = -1;
+                    battle.targetMenu.selectedOption = -1;
+                }
+            }
+            break;
     }
 
 
@@ -147,22 +240,83 @@ function battleDraw(state) {
     //battle.characters[0].drawSkillMenu();
 
     // draw the battle menu
-    if (battle.uiCharacter != -1 && battle.characters[battle.uiCharacter] != null) {
-        
-        switch (battle.uiPage) {
-            case 0: // command menu
-                battle.statusMenu.draw();
-                //battle.characters[battle.uiCharacter].drawSkillMenu();
-                battle.attackButton.draw();
-                battle.skillButton.draw();
-                battle.defendButton.draw();
-                battle.buttonFour.draw();
-                break;
-            case 1: // skill (magic) menu
-                battle.characters[battle.uiCharacter].drawSkillMenu();
-                break;
-            case 2: // target menu
-                break;
+    updateTargetingMode(); // I am aware this function appears twice, but that's fine
+
+    // Tooltip
+    noStroke();
+    textAlign(LEFT, BOTTOM);
+    textSize(15);
+    fill('#FFFFFFFF');
+    if (battle.uiCharacter != -1) {
+        var thisCharacter = battle.characters[battle.uiCharacter];
+        if (battle.attackButton.highlight) {
+            text("Attack with " + thisCharacter.name + "\'s weapon", 5, height - 160);
+        } else if (battle.skillButton.highlight) {
+            text("Use " + thisCharacter.name + "\'s magic", 5, height - 160);
+        } else if (battle.defendButton.highlight) {
+            text("Have " + thisCharacter.name + " defend", 5, height - 160);
+        } else if (battle.buttonFour.highlight) {
+            if (battle.buttonFour.disabled) {
+                fill('#444444FF');
+            }
+            text("Return to previous menu", 5, height - 160);
         }
     }
+
+    switch (battle.uiPage) {
+        case 0: // command menu
+            battle.statusMenu.draw();
+            break;
+        case 1: // skill (magic) menu
+            if (battle.uiCharacter != -1) { // it should be impossible, but the more random checks, the less testing I have to do at the end
+                var thisCharacter = battle.characters[battle.uiCharacter];
+                var highlightedSpell = battle.characters[battle.uiCharacter].skillMenu.menu.highlightedOption;
+                var available = (highlightedSpell != -1) ? battle.characters[battle.uiCharacter].skillMenu.menu.options[highlightedSpell].available : false;
+                fill('#FFFFFFFF');
+                if (highlightedSpell == -1) {
+                    text("Choose a magic ability", 220, height - 160);
+                } else {
+                    var spell = battle.characters[battle.uiCharacter].skills[highlightedSpell];
+                    if (!available) {
+                        fill('#444444FF');
+                    }
+                    text(spell.description, 220, height - 160);
+                }
+                textSize(8);
+                fill('#FFFFFFFF');
+                textAlign(RIGHT, BOTTOM);
+                text("Scroll wheel if there's more spells", width - 5, height - 160);
+            } else {
+                battle.uiPage = 0;
+            }
+            battle.characters[battle.uiCharacter].drawSkillMenu();
+            break;
+        case 2: // target menu
+            if (battle.uiCharacter != -1) { // it should be impossible, but the more random checks, the less testing I have to do at the end
+                var thisCharacter = battle.characters[battle.uiCharacter];
+                var battleHighlight = battle.targetMenu.highlightedOption;
+                var battleTargetCharacter = (battleHighlight != -1) ? battle.targetMenu.optCharacterIndex[battleHighlight] : -1;
+                fill('#FFFFFFFF');
+                if (battleTargetCharacter == -1) {
+                    text("Choose a target", 220, height - 160);
+                } else {
+                    var targetCharacter = battle.characters[battleTargetCharacter];
+                    var targetSpell = (battle.chosenSkill != -1) ? thisCharacter.skills[battle.chosenSkill] : null;
+                    if (targetSpell != null) {
+                        text("Cast \"" + targetSpell.name + "\" on \"" + targetCharacter.name + "\"", 220, height - 160);
+                    } else {
+                        text("Attack \"" + targetCharacter.name + "\"", 220, height - 160);
+                    }
+                }
+                battle.targetMenu.draw();
+            } else {
+                battle.uiPage = 0;
+            }
+            break;
+    }
+
+    battle.attackButton.draw();
+    battle.skillButton.draw();
+    battle.defendButton.draw();
+    battle.buttonFour.draw();
 }

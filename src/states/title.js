@@ -10,7 +10,7 @@ var title;
 
 class TitleState {
     constructor() {
-        this.temporaryButton = newButton("fbsdsdaflk", 20, 20, 200, 60, LEFT, LEFT);
+        this.temporaryButton = newButton("fbsdsdaflk", 20, 20, 200, 60, 45, LEFT, LEFT);
     }
 }
 
