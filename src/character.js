@@ -50,7 +50,6 @@ class Character {
         this.rotation = 0;
 
         this.animation.changeAnim(0, 6, 0.02, true);
-        // this.animation.changeAnim(1, 6, 0.22);
     }
 
     drawSkillMenu() {
@@ -60,7 +59,11 @@ class Character {
     }
 
     setupAttack() {
-        this.animation.changeAnim(1, 6, 0.12);
+        this.animation.changeAnim(1, 6, 0.12, false);
+    }
+
+    setupHurt() {
+        this.animation.changeAnim(2, 1, 0.32, true);
     }
 
     update(atbIsPaused) {
@@ -73,6 +76,7 @@ class Character {
 
         if (this.hp <= 0) {
             this.hp = 0;
+            this.animation.changeAnim(3, 0, 0.0, false);
             this.dead = true;
             return;
         }
@@ -98,7 +102,7 @@ class Character {
     }
 
     draw() {
-        if (this.animation.anim == 1 && this.animation.done) {
+        if ((this.animation.anim == 1 && this.animation.done) || (this.animation.anim == 2 && this.animation.repeats > 10)) {
             this.animation.changeAnim(0, 6, 0.02, true);
         }
 

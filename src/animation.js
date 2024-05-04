@@ -13,8 +13,10 @@ class SpriteAnimation {
         this.speed = 1.0;
         this.frameTimer = 0.0;
 
-        this.loop = false;
+        this.loop = true;
         this.done = true;
+
+        this.repeats = 0;
     }
 
     draw(spriteX, spriteY, scaleX, scaleY, rotation) {
@@ -22,8 +24,8 @@ class SpriteAnimation {
         // update the frame
         this.frameTimer += this.speed;
         if (this.loop) {
-            if (this.frameTimer > this.endFrame) this.frameTimer = 0;
-            if (this.frameTimer < 0) this.frameTimer = this.endFrame; // for reverse
+            if (this.frameTimer > (this.endFrame + 1)) { this.frameTimer = 0; this.repeats++; }
+            if (this.frameTimer < -1) { this.frameTimer = this.endFrame; this.repeats++; } // for reverse
         } else {
             this.frameTimer = constrain(this.frameTimer, 0, this.endFrame);
             if (this.frameTimer >= this.endFrame) this.done = true;
@@ -55,5 +57,6 @@ class SpriteAnimation {
         this.speed = speed;
         this.done = false;
         this.loop = loop;
+        this.repeats = 0;
     }
 }

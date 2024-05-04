@@ -247,6 +247,7 @@ function activateSkill(source, target, skillIndex) {
     if (skillIndex == -1) {
         print(source.name + " ATTACKING " + target.name);
         source.setupAttack();
+        target.setupHurt();
     } else {
         var skill = source.skills[skillIndex];
         print(source.name + " CASTING " + skill.name + " ON " + target.name);
