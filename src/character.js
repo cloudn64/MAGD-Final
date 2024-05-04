@@ -38,6 +38,7 @@ class Character {
 
         this.dead = false;
         this.defending = false;
+        this.scanned = this.isPlayer; // shows stats when in target menus
 
         this.atbTimer = 0;
     }

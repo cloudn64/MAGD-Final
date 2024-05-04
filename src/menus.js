@@ -632,20 +632,24 @@ class BattleStatus {
             }
 
             // ATB Bar
-            var atbBarScale = 7;
-            var atbBarHeight = (bHeight - (atbBarScale * 2));
-            this.menuGraphics.fill('#333333FF');
-            this.menuGraphics.rect(bX + 8, bY + atbBarScale, 6, atbBarHeight);
-            // ATB Bar Fill
-            var atbBarFill = (thisCharacter.atbTimer / (ATB_MAX - thisCharacter.speed));
-            this.menuGraphics.fill(255 - (atbBarFill * 255), (atbBarFill * 255), 0, 255);
-            this.menuGraphics.rect(bX + 8, atbBarHeight - (atbBarFill * atbBarHeight) + bY + atbBarScale, 6, atbBarFill * atbBarHeight);
+            if (thisCharacter.scanned) {
+                var atbBarScale = 7;
+                var atbBarHeight = (bHeight - (atbBarScale * 2));
+                this.menuGraphics.fill('#333333FF');
+                this.menuGraphics.rect(bX + 8, bY + atbBarScale, 6, atbBarHeight);
+                // ATB Bar Fill
+                var atbBarFill = (thisCharacter.atbTimer / (ATB_MAX - thisCharacter.speed));
+                this.menuGraphics.fill(255 - (atbBarFill * 255), (atbBarFill * 255), 0, 255);
+                this.menuGraphics.rect(bX + 8, atbBarHeight - (atbBarFill * atbBarHeight) + bY + atbBarScale, 6, atbBarFill * atbBarHeight);
 
-            // Name and HP text color
-            if (thisCharacter.dead) { // you are dead
-                this.menuGraphics.fill(this.deadTextColor);
-            } else if (thisCharacter.hp < (thisCharacter.maxHP / 10)) { // you have less than a tenth of your health
-                this.menuGraphics.fill(this.unhealthyTextColor);
+                // Name and HP text color
+                if (thisCharacter.dead) { // you are dead
+                    this.menuGraphics.fill(this.deadTextColor);
+                } else if (thisCharacter.hp < (thisCharacter.maxHP / 10)) { // you have less than a tenth of your health
+                    this.menuGraphics.fill(this.unhealthyTextColor);
+                } else {
+                    this.menuGraphics.fill(this.textColor);
+                }
             } else {
                 this.menuGraphics.fill(this.textColor);
             }
@@ -657,36 +661,38 @@ class BattleStatus {
             // name text
             this.menuGraphics.text(thisCharacter.name, bX + textOffset, bY + (bHeight / 2));
 
-            var statsOffset = 110;
-            var barLength = 300;
-            var textSpaceCut = bHeight / (this.hpMpTextSize * 0.5);
+            if (thisCharacter.scanned) {
+                var statsOffset = 110;
+                var barLength = 300;
+                var textSpaceCut = bHeight / (this.hpMpTextSize * 0.5);
 
-            this.menuGraphics.textSize(this.hpMpTextSize);
-            // HP Text and Bar
-            this.menuGraphics.text(thisCharacter.hp + "/" + thisCharacter.maxHP + "HP", bX + statsOffset, bY + (textSpaceCut));
-            this.menuGraphics.fill('#222222CC');
-            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
-            var hpBarFill = (thisCharacter.hp / (thisCharacter.maxHP)) * barLength;
-            this.menuGraphics.fill('#00FF00FF');
-            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), hpBarFill, textSpaceCut / 2); // full bar
+                this.menuGraphics.textSize(this.hpMpTextSize);
+                // HP Text and Bar
+                this.menuGraphics.text(thisCharacter.hp + "/" + thisCharacter.maxHP + "HP", bX + statsOffset, bY + (textSpaceCut));
+                this.menuGraphics.fill('#222222CC');
+                this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
+                var hpBarFill = (thisCharacter.hp / (thisCharacter.maxHP)) * barLength;
+                this.menuGraphics.fill('#00FF00FF');
+                this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), hpBarFill, textSpaceCut / 2); // full bar
 
 
-            // MP text color
-            if (thisCharacter.dead || thisCharacter.mp == 0) { // you are dead or you have 0 MP
-                this.menuGraphics.fill(this.deadTextColor);
-            } else if (thisCharacter.mp < (thisCharacter.maxMP / 10)) { // you have less than a tenth of your MP
-                this.menuGraphics.fill(this.unhealthyTextColor);
-            } else {
-                this.menuGraphics.fill(this.textColor);
+                // MP text color
+                if (thisCharacter.dead || thisCharacter.mp == 0) { // you are dead or you have 0 MP
+                    this.menuGraphics.fill(this.deadTextColor);
+                } else if (thisCharacter.mp < (thisCharacter.maxMP / 10)) { // you have less than a tenth of your MP
+                    this.menuGraphics.fill(this.unhealthyTextColor);
+                } else {
+                    this.menuGraphics.fill(this.textColor);
+                }
+
+                // MP
+                this.menuGraphics.text(thisCharacter.mp + "/" + thisCharacter.maxMP + "MP", bX + statsOffset, bY + (textSpaceCut * 3));
+                this.menuGraphics.fill('#222222CC');
+                this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 4) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
+                var mpBarFill = (thisCharacter.mp / (thisCharacter.maxMP)) * barLength;
+                this.menuGraphics.fill('#FF33FFFF');
+                this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 4) - (textSpaceCut / 2), mpBarFill, textSpaceCut / 2); // full bar
             }
-
-            // MP
-            this.menuGraphics.text(thisCharacter.mp + "/" + thisCharacter.maxMP + "MP", bX + statsOffset, bY + (textSpaceCut * 3));
-            this.menuGraphics.fill('#222222CC');
-            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 4) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
-            var mpBarFill = (thisCharacter.mp / (thisCharacter.maxMP)) * barLength;
-            this.menuGraphics.fill('#FF33FFFF');
-            this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 4) - (textSpaceCut / 2), mpBarFill, textSpaceCut / 2); // full bar
         }
 
         /*  MENU DRAW  */
