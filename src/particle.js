@@ -6,6 +6,9 @@ const PARTICLE_LIFE_SPARKLE = 4
 const PARTICLE_SCAN = 5
 const PARTICLE_MEDIUM_FIRE = 6
 const PARTICLE_LARGE_FIRE = 7
+const PARTICLE_CHARGE = 8
+const PARTICLE_RAGE = 9
+const PARTICLE_MPDRAIN = 10
 
 class Particle { // it refuses to accept that Particle is defined, so I named it Particle
     constructor(x, y, xVel, yVel, life, type, text, color) {
@@ -44,6 +47,18 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 this.animation = new SpriteAnimation("assets/particle/small_fire/", 0);
                 this.animation.changeAnim(2, 1, 0.3, true);
                 break;
+            case (PARTICLE_CHARGE):
+                this.animation = new SpriteAnimation("assets/particle/charge/", 0);
+                this.animation.changeAnim(0, 5, 0.4, true);
+                break;
+            case (PARTICLE_RAGE):
+                this.animation = new SpriteAnimation("assets/particle/rage/", 0);
+                this.animation.changeAnim(0, 0, 0.0, false);
+                break;
+            case (PARTICLE_MPDRAIN):
+                this.animation = new SpriteAnimation("assets/particle/charge/", 0);
+                this.animation.changeAnim(0, 5, 0.4, true);
+                break;
         }
     }
 
@@ -60,17 +75,26 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
             case PARTICLE_SMALL_FIRE:
             case PARTICLE_MEDIUM_FIRE:
             case PARTICLE_LARGE_FIRE:
+            case PARTICLE_CHARGE:
                 this.y += this.yVel;
                 this.yVel /= 1.01;
                 this.x += this.xVel;
                 this.xVel /= 1.01;
                 break;
+            case PARTICLE_RAGE:
             case PARTICLE_LIFE_SPARKLE:
             case PARTICLE_SCAN:
                 this.y += this.yVel;
                 this.yVel /= 1.02;
                 this.x += this.xVel;
                 this.xVel /= 1.02;
+                break;
+            case PARTICLE_MPDRAIN:
+                var travelFrames = 30;
+                var speedX = (this.x - this.xVel) / travelFrames;
+                var speedY = (this.y - this.yVel) / travelFrames;
+                this.x -= speedX;
+                this.y -= speedY;
                 break;
 
         }
@@ -104,7 +128,10 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 fill(this.color);
                 this.animation.drawImpl(this.x, this.y, 1, 1, 0, this.color);
                 break;
+            case PARTICLE_RAGE:
             case PARTICLE_LIFE_SPARKLE:
+            case PARTICLE_CHARGE:
+            case PARTICLE_MPDRAIN:
                 this.animation.drawImpl(this.x, this.y, 0.5, 0.5, 0, this.color);
             case PARTICLE_SCAN:
                 this.animation.drawImpl(this.x, this.y, 0.2, 0.2, 0, this.color);

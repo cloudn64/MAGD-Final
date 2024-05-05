@@ -535,9 +535,13 @@ class BattleStatus {
         this.selectAlphaWave = 0; // a sine wave for the alpha of the selected option
         this.selectAlphaAngle = 0; // not actually an angle, but is named "angle" because it's being used in sine
 
+        this.secondAlphaWave = 0; // a sine wave for general purpose
+        this.secondAlphaAngle = 0; // not actually an angle, but is named "angle" because it's being used in sine
+
         this.showEnemies = false; // false if this menu shows players, true if it shows enemies.
         this.noSuitableChoice = false; // Disables suitable choice logic with ATB
         this.targetATB = false; // Allows you to target people without their ATB being full
+        this.targetEnraged = false; // Allows you to target people who are enraged
         this.targetDead = false; // Allows you to target dead people
     }
 
@@ -561,6 +565,7 @@ class BattleStatus {
 
     setupTargetingMode(enemies, allowDead) {
         this.targetATB = true;
+        this.targetEnraged = true;
         this.noSuitableChoice = true;
         this.showEnemies = enemies;
         this.targetDead = allowDead;
@@ -586,6 +591,8 @@ class BattleStatus {
         } else {
             this.selectAlphaWave = 0;
         }
+
+        this.secondAlphaWave = ((sin(this.secondAlphaAngle++ / 20) + 1.5) * 20);
 
         /*  PRE-EMPTIVE INFORMATION  */
         this.maxCharacters = 0;
@@ -699,7 +706,11 @@ class BattleStatus {
                 this.menuGraphics.fill(this.textShadowColor);
                 this.menuGraphics.text(thisCharacter.name, bX + textOffset + this.lightSourceX, bY + (bHeight / 2) + this.lightSourceY);
             }
+            
             this.menuGraphics.fill(nameHpTextColor);
+            if (!thisCharacter.dead && thisCharacter.powerCharge) {
+                this.menuGraphics.fill(255 - this.secondAlphaWave, this.secondAlphaWave, 255 - this.secondAlphaWave, 255);
+            }
             this.menuGraphics.text(thisCharacter.name, bX + textOffset, bY + (bHeight / 2));
 
             if (thisCharacter.scanned) {
@@ -781,7 +792,7 @@ class BattleStatus {
             for (var c = 0; c < this.maxCharacters; c++) {
                 if (this.optCharacterIndex[c] != -1) {
                     var thisCharacter = this.battleState.characters[this.optCharacterIndex[c]];
-                    if (thisCharacter != null && (this.canTargetLifeStatus(thisCharacter)) && (this.targetATB || thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed))) { // ATB is ignored in target mode
+                    if (thisCharacter != null && (this.targedEnraged || thisCharacter.enraged <= 0) && (this.canTargetLifeStatus(thisCharacter)) && (this.targetATB || thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed))) { // ATB is ignored in target mode
                         this.selectedOption = c;
                     }
                 }
@@ -816,7 +827,7 @@ class BattleStatus {
                 this.release = false; // you're pushing the button so you're not releasing it.
                 if (!this.click && !this.hold) { // If not click or hold, set click
                     this.click = true;
-                    if ((characterIsHighlighted && (this.canTargetLifeStatus(highlightedCharacter)) && (this.targetATB || characterAtbReady))) { // not dead and ATB ready (ATB is ignored in target mode)
+                    if ((characterIsHighlighted && (this.canTargetLifeStatus(highlightedCharacter)) && (this.targedEnraged || thisCharacter.enraged <= 0) && (this.targetATB || characterAtbReady))) { // not dead and ATB ready (ATB is ignored in target mode)
                         this.selectedOption = this.highlightedOption;
                         print("I clicked a character");
                         optChooseNoise.play();

@@ -344,11 +344,21 @@ function battleDraw(state) {
         }
     }
 
-    // draw particles
+    // draw particles that aren't PARTICLE_TEXT or PARTICLE_SKILL_TEXT
     // unlike the meaningless loop for the battle actions, this loop actually has a reason to exist
     for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
         var particle = battle.particleQueue[particleIndex];
-        particle.draw();
+        if (particle.type != PARTICLE_TEXT && particle.type != PARTICLE_SKILL_TEXT) {
+            particle.draw();
+        }
+    }
+
+    // draw particles that are PARTICLE_TEXT or PARTICLE_SKILL_TEXT
+    for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
+        var particle = battle.particleQueue[particleIndex];
+        if (particle.type == PARTICLE_TEXT || particle.type == PARTICLE_SKILL_TEXT) {
+            particle.draw();
+        }
     }
 
 
