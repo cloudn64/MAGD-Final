@@ -3,6 +3,9 @@ const PARTICLE_SKILL_TEXT = 1
 const PARTICLE_MAGIC = 2
 const PARTICLE_SMALL_FIRE = 3
 const PARTICLE_LIFE_SPARKLE = 4
+const PARTICLE_SCAN = 5
+const PARTICLE_MEDIUM_FIRE = 6
+const PARTICLE_LARGE_FIRE = 7
 
 class Particle { // it refuses to accept that Particle is defined, so I named it Particle
     constructor(x, y, xVel, yVel, life, type, text, color) {
@@ -29,6 +32,18 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 this.animation = new SpriteAnimation("assets/particle/life_sparkle/", 0);
                 this.animation.changeAnim(0, 6, 0.3, false);
                 break;
+            case (PARTICLE_SCAN):
+                this.animation = new SpriteAnimation("assets/particle/scan/", 0);
+                this.animation.changeAnim(0, 9, 0.3, true);
+                break;
+            case (PARTICLE_MEDIUM_FIRE):
+                this.animation = new SpriteAnimation("assets/particle/small_fire/", 0);
+                this.animation.changeAnim(1, 1, 0.3, true);
+                break;
+            case (PARTICLE_LARGE_FIRE):
+                this.animation = new SpriteAnimation("assets/particle/small_fire/", 0);
+                this.animation.changeAnim(2, 1, 0.3, true);
+                break;
         }
     }
 
@@ -43,12 +58,15 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
             case PARTICLE_MAGIC:
                 break;
             case PARTICLE_SMALL_FIRE:
+            case PARTICLE_MEDIUM_FIRE:
+            case PARTICLE_LARGE_FIRE:
                 this.y += this.yVel;
                 this.yVel /= 1.01;
                 this.x += this.xVel;
                 this.xVel /= 1.01;
                 break;
             case PARTICLE_LIFE_SPARKLE:
+            case PARTICLE_SCAN:
                 this.y += this.yVel;
                 this.yVel /= 1.02;
                 this.x += this.xVel;
@@ -81,11 +99,15 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 break;
             case PARTICLE_MAGIC:
             case PARTICLE_SMALL_FIRE:
+            case PARTICLE_MEDIUM_FIRE:
+            case PARTICLE_LARGE_FIRE:
                 fill(this.color);
                 this.animation.drawImpl(this.x, this.y, 1, 1, 0, this.color);
                 break;
             case PARTICLE_LIFE_SPARKLE:
                 this.animation.drawImpl(this.x, this.y, 0.5, 0.5, 0, this.color);
+            case PARTICLE_SCAN:
+                this.animation.drawImpl(this.x, this.y, 0.2, 0.2, 0, this.color);
                 break;
         }
     }

@@ -36,18 +36,17 @@ class BattleState {
         this.fanfareFlag = false;
 
         this.bgm.play();
-        this.bgm.loop();
+        this.bgm.loop(0, 1, 1);
 
     }
 
     setupBattle0() { // test battle
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 399, 1)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Ultiman", 180, 120, 400, 999, 1, 1, 140, 1)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210, 9999, 999, 1, 1, 1, 1)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1000, 1, 99, 1000)); // add enemy
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60,       /*maxHP*/2400,  /*maxMP*/200, /*str*/120,   /*def*/28,   /*spd*/50,    /*mag*/50,     sPlayerSkillList)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Ultiman", 180, 120,   /*maxHP*/3800,  /*maxMP*/350, /*str*/209,   /*def*/32,   /*spd*/80,    /*mag*/28,     sPlayerSkillList)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210,     /*maxHP*/1900,  /*maxMP*/170, /*str*/80,    /*def*/10,   /*spd*/35,    /*mag*/92,     sPlayerSkillList)); // add player
+        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150,     /*maxMP*/24000, /*maxMP*/500, /*str*/500,   /*def*/50,   /*spd*/102,   /*mag*/500,    sPlayerSkillList)); // add enemy
 
-        this.characters[1].hp = 0;
-        this.characters[1].hpTarget = 0;
+        this.characters[0].atbTimer = 400;
     }
 }
 

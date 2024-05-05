@@ -10,6 +10,7 @@ function preload() {
   attackishNoise = loadSound("assets/sounds/attackishNoise.wav");
   dashNoise = loadSound("assets/sounds/dash.wav");
   attackishNoise3 = loadSound("assets/sounds/attackishNoise3.wav");
+  attackishNoise5 = loadSound("assets/sounds/attackishNoise5.wav");
   magicishNoise = loadSound("assets/sounds/magicishNoise.wav");
   magicishNoise2 = loadSound("assets/sounds/magicishNoise2.wav");
   magicishNoise3 = loadSound("assets/sounds/magicishNoise3.wav");
@@ -22,12 +23,13 @@ function preload() {
   magicishNoise10 = loadSound("assets/sounds/magicishNoise10.wav");
   magicishNoise11 = loadSound("assets/sounds/magicishNoise11.wav");
   magicishNoise12 = loadSound("assets/sounds/magicishNoise12.wav");
+  scanNoise = loadSound("assets/sounds/scanNoise.wav");
 
   // Fonts
   gameFont = loadFont("assets/font/PressStart2P-vaV7.ttf");
 
   // Music
-  battleTheme = loadSound("assets/music/battleTheme.wav");
+  battleTheme = createAudio("assets/music/battleTheme.wav");
   gameOverTheme = loadSound("assets/music/gameOverTheme.wav");
   victoryTheme = loadSound("assets/music/victoryTheme.wav");
 

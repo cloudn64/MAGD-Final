@@ -9,6 +9,7 @@ const sBattleActionFuncs = [
     { init: rangedAttackActionInit, update: rangedAttackActionUpdate, draw: rangedAttackActionDraw, finish: rangedAttackActionFinish }, // Ranged Attack
     { init: fireActionInit, update: fireActionUpdate, draw: fireActionDraw, finish: fireActionFinish }, // Fire Magic
     { init: lifeActionInit, update: lifeActionUpdate, draw: lifeActionDraw, finish: lifeActionFinish }, // Life Magic
+    { init: scanActionInit, update: scanActionUpdate, draw: scanActionDraw, finish: scanActionFinish }, // Scan Magic
  ];
 
 class BattleAction {
@@ -232,8 +233,21 @@ function fireActionUpdate(action) {
     }
     if (action.timer >= 20) {
         if ((action.timer % 10) == 0) {
-            attackishNoise3.play();
-            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-5, 5), random(-8, 1), 80, PARTICLE_SMALL_FIRE, "", '#FFFFFFEE');
+            var power = magicActionGetPotency(action);
+            if (power > 1000) {
+                magicishNoise7.play();
+                addParticle(action.targetCharacter.x + random(-10, 10), action.targetCharacter.y + random(-10, 10), random(-1, 1), random(-3, 1), 80, PARTICLE_LARGE_FIRE, "", '#FFFFFFEE');
+                addParticle(action.targetCharacter.x + random(-15, 15), action.targetCharacter.y + random(-15, 15), random(-2, 2), random(-6, 2), 80, PARTICLE_LARGE_FIRE, "", '#FFFFFFEE');
+            } else if (power > 300) {
+                attackishNoise5.play();
+                var xDir = random(-5, 5);
+                var yDir = random(-8, 1);
+                addParticle(action.targetCharacter.x, action.targetCharacter.y, xDir, yDir, 80, PARTICLE_MEDIUM_FIRE, "", '#FFFFFFEE');
+                addParticle(action.targetCharacter.x, action.targetCharacter.y, -xDir, -yDir, 80, PARTICLE_MEDIUM_FIRE, "", '#FFFFFFEE');
+            } else {
+                attackishNoise3.play();
+                addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-5, 5), random(-8, 1), 80, PARTICLE_SMALL_FIRE, "", '#FFFFFFEE');
+            }
         }
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
         action.targetCharacter.y = action.targetStartPosY + random(-9, 9);
@@ -299,7 +313,6 @@ function lifeActionUpdate(action) {
     if (action.timer == 100) {
         var life = action.targetCharacter.applyHealing(magicActionGetPotency(action), action.sourceCharacter.magic);
         addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, life, '#00FF00FF');
-        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
         magicishNoise12.play();
     }
 
@@ -313,6 +326,70 @@ function lifeActionDraw(action) {
 }
 
 function lifeActionFinish(action) {
+    action.sourceCharacter.x = action.sourceStartPosX;
+    action.sourceCharacter.y = action.sourceStartPosY;
+    action.targetCharacter.x = action.targetStartPosX;
+    action.targetCharacter.y = action.targetStartPosY;
+    action.targetCharacter.defaultAnim();
+    action.sourceCharacter.defaultAnim();
+    action.isDone = true;
+}
+
+/* SCAN MAGIC */
+
+function scanActionInit(action) {
+    action.sourceStartPosX = action.sourceCharacter.x;
+    action.sourceStartPosY = action.sourceCharacter.y;
+    action.targetStartPosX = action.targetCharacter.x;
+    action.targetStartPosY = action.targetCharacter.y;
+
+    if (action.skillIndex == -1) {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+    } else {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
+    }
+    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FFFF00FF');
+    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
+}
+
+function scanActionUpdate(action) {
+    if (!action.isInit) {
+        action.isInit = true;
+        action.init(action);
+    }
+    action.timer++;
+
+    if (action.timer >= 20) {
+        if ((action.timer % 3) == 0) {
+            var xDir = random(-0.5, 0.5);
+            var yDir = random(-0.5, 0.5);
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), xDir, yDir, 18, PARTICLE_SCAN, "", '#FFFFFFFF');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), -xDir, yDir, 18, PARTICLE_SCAN, "", '#FFFFFFFF');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), xDir, -yDir, 18, PARTICLE_SCAN, "", '#FFFFFFFF');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), -xDir, -yDir, 18, PARTICLE_SCAN, "", '#FFFFFFFF');
+        }
+    }
+
+    if (action.timer == 20) {
+        scanNoise.play();
+    }
+
+    if (action.timer == 70) {
+        action.targetCharacter.scanned = true;
+    }
+
+    if (action.timer >= 100) {
+        action.finish(action);
+    }
+}
+
+function scanActionDraw(action) {
+
+}
+
+function scanActionFinish(action) {
     action.sourceCharacter.x = action.sourceStartPosX;
     action.sourceCharacter.y = action.sourceStartPosY;
     action.targetCharacter.x = action.targetStartPosX;

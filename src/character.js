@@ -3,12 +3,15 @@ const DRAIN_SPEED = 10;
 
 const sPlayerSkillList = [
     FIREI_SKILL,
+    FIREII_SKILL,
+    FIREIII_SKILL,
     LIFEI_SKILL,
     LIFEII_SKILL,
+    SCAN_SKILL,
 ];
 
 class Character {
-    constructor(isPlayer, ID, name, x, y, maxHP, maxMP, str, def, spd, mag) { // ID should be assigned by the battle engine
+    constructor(isPlayer, ID, name, x, y, maxHP, maxMP, str, def, spd, mag, skillList) { // ID should be assigned by the battle engine
         this.isPlayer = isPlayer;
         this.name = name;
         this.ID = ID;
@@ -29,7 +32,7 @@ class Character {
         this.magic = mag; // Magic power
 
         // Skill pointer array created from skill list, points to skills inside global skill array
-        this.skills = skillListToSkills(sPlayerSkillList); // Kind of wild system, but wild is how we like it. Finished on time is even more how we like it.
+        this.skills = skillListToSkills(skillList); // Kind of wild system, but wild is how we like it. Finished on time is even more how we like it.
 
         // Menu for this character's skills (not created for enemies because they aren't controlled in the UI)
         // Having each player own a menu for this instead of one global menu reading data from the player is admittedly very strange
@@ -43,7 +46,6 @@ class Character {
         this.dead = false;
         this.defending = false;
         this.scanned = this.isPlayer; // shows this character's stats in menus. If false, only their name will appear.
-        this.scanned = true; // TEMP
 
         // ATB Timer
         this.atbTimer = 0;
@@ -94,7 +96,7 @@ class Character {
     pickRandomSkill() {
         this.atbTimer = 0;
 
-        if (random(0, 4) >= 2) { // greater chance to attack
+        if (random(0, 8) >= 6) { // slightly greater chance to attack
             this.attackRandomTarget();
         } else { // magic
             var randomSkill = (int)(random(0, this.skills.length));
