@@ -2,6 +2,7 @@ const PARTICLE_TEXT = 0
 const PARTICLE_SKILL_TEXT = 1
 const PARTICLE_MAGIC = 2
 const PARTICLE_SMALL_FIRE = 3
+const PARTICLE_LIFE_SPARKLE = 4
 
 class Particle { // it refuses to accept that Particle is defined, so I named it Particle
     constructor(x, y, xVel, yVel, life, type, text, color) {
@@ -24,6 +25,10 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 this.animation = new SpriteAnimation("assets/particle/small_fire/", 0);
                 this.animation.changeAnim(0, 1, 0.3, true);
                 break;
+            case (PARTICLE_LIFE_SPARKLE):
+                this.animation = new SpriteAnimation("assets/particle/life_sparkle/", 0);
+                this.animation.changeAnim(0, 6, 0.3, false);
+                break;
         }
     }
 
@@ -43,6 +48,13 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 this.x += this.xVel;
                 this.xVel /= 1.01;
                 break;
+            case PARTICLE_LIFE_SPARKLE:
+                this.y += this.yVel;
+                this.yVel /= 1.02;
+                this.x += this.xVel;
+                this.xVel /= 1.02;
+                break;
+
         }
 
         this.life = constrain(this.life - 1, 0, this.life);
@@ -56,7 +68,7 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
     draw() {
         switch (this.type) {
             case PARTICLE_TEXT:
-                fill('#FFFFFFEE');
+                fill(this.color);
                 noStroke();
                 textSize(9);
                 text(this.text, this.x, this.y);
@@ -71,6 +83,9 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
             case PARTICLE_SMALL_FIRE:
                 fill(this.color);
                 this.animation.drawImpl(this.x, this.y, 1, 1, 0, this.color);
+                break;
+            case PARTICLE_LIFE_SPARKLE:
+                this.animation.drawImpl(this.x, this.y, 0.5, 0.5, 0, this.color);
                 break;
         }
     }

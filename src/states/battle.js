@@ -42,9 +42,12 @@ class BattleState {
 
     setupBattle0() { // test battle
         this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 399, 1)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 180, 120, 0, 999, 1, 1, 140, 1)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Ultiman", 180, 120, 400, 999, 1, 1, 140, 1)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210, 9999, 999, 1, 1, 1, 1)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1000, 1, 399, 1000)); // add enemy
+        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1000, 1, 99, 1000)); // add enemy
+
+        this.characters[1].hp = 0;
+        this.characters[1].hpTarget = 0;
     }
 }
 
@@ -58,7 +61,7 @@ function battleInit(state) {
 }
 
 // selects a random target
-function getRandomTarget(targetPlayers, targetEnemies) {
+function getRandomTarget(targetPlayers, targetEnemies, targetDead) {
     var targetList = new Array();
 
     print("create targetList. Max: " + battle.characters.length);
@@ -66,7 +69,7 @@ function getRandomTarget(targetPlayers, targetEnemies) {
     for (var character = 0; character < battle.characters.length; character++) {
         var curCharacter = battle.characters[character];
 
-        if (curCharacter != null && !curCharacter.dead) {
+        if (curCharacter != null && ((!targetDead && !curCharacter.dead) || (targetDead && curCharacter.dead))) {
             if (curCharacter.isPlayer && targetPlayers) {
                // print("add player to targetList");
                 targetList.push(curCharacter);

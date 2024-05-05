@@ -566,6 +566,10 @@ class BattleStatus {
         this.targetDead = allowDead;
     }
 
+    canTargetLifeStatus(character) {
+        return ((this.targetDead && character.dead) || (!this.targetDead && !character.dead));
+    }
+
     draw() {
         var borderOffset = (this.border) ? this.borderDensity : 0;
 
@@ -766,7 +770,7 @@ class BattleStatus {
                 this.selectedOption = -1;
             } else {
                 var selectedCharacter = this.battleState.characters[this.optCharacterIndex[this.selectedOption]];
-                if ((!this.targetATB && (selectedCharacter.atbTimer < (ATB_MAX - selectedCharacter.speed))) || (!this.targetDead && selectedCharacter.dead)) { // Don't select character with not ready ATB or dead character (ATB is ignored for target mode)
+                if ((!this.targetATB && (selectedCharacter.atbTimer < (ATB_MAX - selectedCharacter.speed))) || !(this.canTargetLifeStatus(selectedCharacter))) { // Don't select character with not ready ATB or dead character (ATB is ignored for target mode)
                     this.selectedOption = -1;
                 }
             }
@@ -777,7 +781,7 @@ class BattleStatus {
             for (var c = 0; c < this.maxCharacters; c++) {
                 if (this.optCharacterIndex[c] != -1) {
                     var thisCharacter = this.battleState.characters[this.optCharacterIndex[c]];
-                    if (thisCharacter != null && (this.targetDead || !thisCharacter.dead) && (this.targetATB || thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed))) { // ATB is ignored in target mode
+                    if (thisCharacter != null && (this.canTargetLifeStatus(thisCharacter)) && (this.targetATB || thisCharacter.atbTimer >= (ATB_MAX - thisCharacter.speed))) { // ATB is ignored in target mode
                         this.selectedOption = c;
                     }
                 }
@@ -812,7 +816,7 @@ class BattleStatus {
                 this.release = false; // you're pushing the button so you're not releasing it.
                 if (!this.click && !this.hold) { // If not click or hold, set click
                     this.click = true;
-                    if ((characterIsHighlighted && (this.targetDead || !highlightedCharacter.dead) && (this.targetATB || characterAtbReady))) { // not dead and ATB ready (ATB is ignored in target mode)
+                    if ((characterIsHighlighted && (this.canTargetLifeStatus(highlightedCharacter)) && (this.targetATB || characterAtbReady))) { // not dead and ATB ready (ATB is ignored in target mode)
                         this.selectedOption = this.highlightedOption;
                         print("I clicked a character");
                         optChooseNoise.play();

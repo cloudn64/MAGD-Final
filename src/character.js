@@ -2,10 +2,10 @@ const ATB_MAX = 400;
 const DRAIN_SPEED = 10;
 
 const sPlayerSkillList = [
-    0,
-    1,
-    2,
-]
+    FIREI_SKILL,
+    LIFEI_SKILL,
+    LIFEII_SKILL,
+];
 
 class Character {
     constructor(isPlayer, ID, name, x, y, maxHP, maxMP, str, def, spd, mag) { // ID should be assigned by the battle engine
@@ -83,24 +83,38 @@ class Character {
         }
     }
 
+    attackRandomTarget() {
+        var attackTarget = getRandomTarget(!this.isPlayer, this.isPlayer, false);
+        if (attackTarget != null) {
+            activateSkill(this, attackTarget, -1);
+        }
+    }
+
     // for the enemies
     pickRandomSkill() {
         this.atbTimer = 0;
-        var target = getRandomTarget(true, false);
-        if (target != null) {
-            if (random(0, 4) >= 2) { // greater chance to attack
-                activateSkill(this, getRandomTarget(true, false), -1);
-            } else { // magic
-                var randomSkill = (int)(random(0, this.skills.length));
 
-                print("I want skill " + randomSkill + " out of my " + this.skills.length + " skills!");
-                print("That's skill " + this.skills[randomSkill].name);
-                if (randomSkill >= this.skills.length || this.skills[randomSkill].mpCost > this.mp) { // bad skill or unaffordable skill
-                    activateSkill(this, getRandomTarget(true, false), -1);
-                    print("but it's too expensive!");
-                } else {
+        if (random(0, 4) >= 2) { // greater chance to attack
+            this.attackRandomTarget();
+        } else { // magic
+            var randomSkill = (int)(random(0, this.skills.length));
+
+            print("I want skill " + randomSkill + " out of my " + this.skills.length + " skills!");
+            print("That's skill " + this.skills[randomSkill].name);
+            if (randomSkill >= this.skills.length || this.skills[randomSkill].mpCost > this.mp) { // bad skill or unaffordable skill
+                this.attackRandomTarget();
+                print("but it's too expensive!");
+            } else {
+                var magicTarget = ((!this.isPlayer) 
+                    ? getRandomTarget(!this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetDead) 
+                    : getRandomTarget(!this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetDead));
+                
+                if (magicTarget != null) {
+                    activateSkill(this, magicTarget, randomSkill);
                     print("here we go!");
-                    activateSkill(this, getRandomTarget(!this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetAllies), randomSkill);
+                } else {
+                    print("no suitable target for my spell...?");
+                    this.attackRandomTarget();
                 }
             }
         }
@@ -108,19 +122,6 @@ class Character {
 
     update(atbIsPaused) {
         var atbIsFull = this.atbTimer >= (ATB_MAX - this.speed);
-        if (this.dead) {
-            this.animation.changeAnim(3, 0, 0.0, false);
-            this.atbTimer = 0;
-            this.isActing = false;
-            this.isReadyToAct = false;
-            return;
-        }
-
-        if (this.hp <= 0) {
-            this.hp = 0;
-            this.dead = true;
-            return;
-        }
 
         // approach HP target
         if (this.hpTarget > this.hp) { // get more HP
@@ -134,6 +135,27 @@ class Character {
             this.mp = constrain(this.mp + DRAIN_SPEED, this.mp, this.mpTarget);
         } else if (this.mpTarget < this.mp) { // lose MP
             this.mp = constrain(this.mp - DRAIN_SPEED, this.mpTarget, this.mp);
+        }
+
+        // Being dead
+        if (this.dead) {
+            if (this.hp != 0) {
+                this.dead = false;
+                this.defaultAnim();
+            } else {
+                this.animation.changeAnim(3, 0, 0.0, false);
+                this.atbTimer = 0;
+                this.isActing = false;
+                this.isReadyToAct = false;
+                return;
+                }
+        }
+
+        // About to be dead
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this.dead = true;
+            return;
         }
 
         if (!atbIsPaused/* && !this.isActing*/) { // update ATB if not doing an attack and the global ATB pause flag is not set
@@ -180,6 +202,14 @@ class Character {
 
         this.hpTarget = constrain(this.hpTarget - attackDamage, 0, this.maxHP);
         return attackDamage;
+    }
+
+    applyHealing(amount, strength) {
+        var powerBonus = random(0.8, 1.2) + (strength / 50);
+        var healPower = (int)(constrain((amount * powerBonus), 0, 9999));
+
+        this.hpTarget = constrain(this.hpTarget + healPower, 0, this.maxHP);
+        return healPower;
     }
 
     applyMagic(amount) {

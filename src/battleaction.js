@@ -1,8 +1,14 @@
+/*
+    Battle Action
+    These actions control the flow of battle kind of like a script, using the characters as puppets
+    The Draw function is probably unused but would have, if time allowed, been for drawing screen effects (like waves)
+*/
 
 const sBattleActionFuncs = [ 
     { init: attackActionInit, update: attackActionUpdate, draw: attackActionDraw, finish: attackActionFinish }, // Attack
     { init: rangedAttackActionInit, update: rangedAttackActionUpdate, draw: rangedAttackActionDraw, finish: rangedAttackActionFinish }, // Ranged Attack
-    { init: fireActionInit, update: fireActionUpdate, draw: fireActionDraw, finish: fireActionFinish }, // Fire Magic Attack
+    { init: fireActionInit, update: fireActionUpdate, draw: fireActionDraw, finish: fireActionFinish }, // Fire Magic
+    { init: lifeActionInit, update: lifeActionUpdate, draw: lifeActionDraw, finish: lifeActionFinish }, // Life Magic
  ];
 
 class BattleAction {
@@ -97,7 +103,7 @@ function attackActionUpdate(action) {
         attackishNoise.play();
         var damage = action.targetCharacter.applyDamage(70, action.sourceCharacter.strength);
         action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
+        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
     }
     if (action.timer >= 20) {
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
@@ -158,7 +164,7 @@ function rangedAttackActionUpdate(action) {
         attackishNoise.play();
         var damage = action.targetCharacter.applyDamage(70, action.sourceCharacter.strength);
         action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
+        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
     }
     if (action.timer >= 20) {
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
@@ -189,7 +195,7 @@ function rangedAttackActionFinish(action) {
     action.isDone = true;
 }
 
-/* GENERIC MAGIC ATTACK */
+/* FIRE MAGIC ATTACK */
 
 function fireActionInit(action) {
     action.sourceStartPosX = action.sourceCharacter.x;
@@ -225,9 +231,9 @@ function fireActionUpdate(action) {
         addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
     }
     if (action.timer >= 20) {
-        if (action.timer % 20) {
+        if ((action.timer % 10) == 0) {
             attackishNoise3.play();
-            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-5, 5), random(-8, 1), 80, PARTICLE_SMALL_FIRE, "", '#FFFFFFFF');
+            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-5, 5), random(-8, 1), 80, PARTICLE_SMALL_FIRE, "", '#FFFFFFEE');
         }
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
         action.targetCharacter.y = action.targetStartPosY + random(-9, 9);
@@ -248,6 +254,65 @@ function fireActionDraw(action) {
 }
 
 function fireActionFinish(action) {
+    action.sourceCharacter.x = action.sourceStartPosX;
+    action.sourceCharacter.y = action.sourceStartPosY;
+    action.targetCharacter.x = action.targetStartPosX;
+    action.targetCharacter.y = action.targetStartPosY;
+    action.targetCharacter.defaultAnim();
+    action.sourceCharacter.defaultAnim();
+    action.isDone = true;
+}
+
+/* LIFE MAGIC */
+
+function lifeActionInit(action) {
+    action.sourceStartPosX = action.sourceCharacter.x;
+    action.sourceStartPosY = action.sourceCharacter.y;
+    action.targetStartPosX = action.targetCharacter.x;
+    action.targetStartPosY = action.targetCharacter.y;
+
+    if (action.skillIndex == -1) {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+    } else {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
+    }
+    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#00FF00FF');
+    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
+}
+
+function lifeActionUpdate(action) {
+    if (!action.isInit) {
+        action.isInit = true;
+        action.init(action);
+    }
+    action.timer++;
+
+    if (action.timer >= 20) {
+        if ((action.timer % 10) == 0) {
+            magicishNoise11.play();
+            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-2, 2), random(-2, 2), 80, PARTICLE_LIFE_SPARKLE, "", '#FFFFFFFF');
+        }
+    }
+
+    if (action.timer == 100) {
+        var life = action.targetCharacter.applyHealing(magicActionGetPotency(action), action.sourceCharacter.magic);
+        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, life, '#00FF00FF');
+        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        magicishNoise12.play();
+    }
+
+    if (action.timer >= 160) {
+        action.finish(action);
+    }
+}
+
+function lifeActionDraw(action) {
+
+}
+
+function lifeActionFinish(action) {
     action.sourceCharacter.x = action.sourceStartPosX;
     action.sourceCharacter.y = action.sourceStartPosY;
     action.targetCharacter.x = action.targetStartPosX;
