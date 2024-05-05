@@ -44,7 +44,7 @@ class BattleState {
         this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60,       /*maxHP*/2400,  /*maxMP*/200, /*str*/120,   /*def*/28,   /*spd*/50,    /*mag*/50,     sPlayerSkillList)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Ultiman", 180, 120,   /*maxHP*/3800,  /*maxMP*/350, /*str*/209,   /*def*/32,   /*spd*/80,    /*mag*/28,     sPlayerSkillList)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210,     /*maxHP*/1900,  /*maxMP*/170, /*str*/80,    /*def*/10,   /*spd*/35,    /*mag*/92,     sPlayerSkillList)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150,     /*maxMP*/24000, /*maxMP*/500, /*str*/500,   /*def*/50,   /*spd*/102,   /*mag*/500,    sPlayerSkillList)); // add enemy
+        this.characters.push(new Character(false, this.characterTotal++, "Enemyman", 480, 150,   /*maxMP*/12000, /*maxMP*/500, /*str*/99,    /*def*/50,   /*spd*/102,   /*mag*/99,     sPlayerSkillList)); // add enemy
 
         this.characters[0].atbTimer = 400;
     }
@@ -305,12 +305,25 @@ function addParticle(x, y, xVel, yVel, life, type, text, color) {
 function activateSkill(source, target, skillIndex) {
     source.atbTimer = 0; // Spend the ATB
     if (skillIndex == -1) {
-        addBattleAction(0, source, target, -1);
+        if (source != target && target.protect) {
+            target.protect = false;
+            blockNoise.play();
+            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "BLOCK", '#FFFFFFFF');
+            addBattleAction(0, source, source, -1);
+        } else {
+            addBattleAction(0, source, target, -1);
+        }
         print(source.name + " ATTACKING " + target.name);
-
     } else {
         var skill = source.skills[skillIndex];
-        addBattleAction(skill.actionId, source, target, skillIndex);
+        if (source != target && target.reflect) {
+            target.reflect = false;
+            blockNoise.play();
+            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "BLOCK", '#FFFFFFFF');
+            addBattleAction(skill.actionId, source, source, skillIndex);
+        } else {
+            addBattleAction(skill.actionId, source, target, skillIndex);
+        }
         print(source.name + " CASTING " + skill.name + " ON " + target.name);
     }
 }

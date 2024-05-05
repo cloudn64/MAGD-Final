@@ -25,6 +25,7 @@ function preload() {
   magicishNoise11 = loadSound("assets/sounds/magicishNoise11.wav");
   magicishNoise12 = loadSound("assets/sounds/magicishNoise12.wav");
   scanNoise = loadSound("assets/sounds/scanNoise.wav");
+  horribleNoise = loadSound("assets/sounds/interestingSound.wav");
 
   // Fonts
   gameFont = loadFont("assets/font/PressStart2P-vaV7.ttf");

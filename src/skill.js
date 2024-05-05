@@ -8,12 +8,19 @@ const HEALI_SKILL = 6;
 const HEALII_SKILL = 7;
 const HEALIII_SKILL = 8;
 const CHARGE_SKILL = 9;
-const ENRAGEI_SKILL = 10
-const ENRAGEII_SKILL = 11
-const REGENI_SKILL = 12
+const ENRAGEI_SKILL = 10;
+const ENRAGEII_SKILL = 11;
+const REGENI_SKILL = 12;
 const REGENII_SKILL = 13;
-const MPDRAINI_SKILL = 14
-const MPDRAINII_SKILL = 15
+const MPDRAINI_SKILL = 14;
+const MPDRAINII_SKILL = 15;
+const PROTECT_SKILL = 16;
+const REFLECT_SKILL = 17;
+const SLOWI_SKILL = 18;
+const SLOWII_SKILL = 19;
+const HASTEI_SKILL = 20;
+const HASTEII_SKILL = 21;
+const DOOM_SKILL = 22;
 
 var sSkillList = [];
 
@@ -49,6 +56,13 @@ function populateGlobalSkillList() {
     sSkillList.push(new Skill("Regen II", "Recover some HP for 8 turns", BATTLEACTION_REGEN, REGENII_SKILL, 150, 25, true, false)); // REGENII_SKILL
     sSkillList.push(new Skill("MP Drain I", "Steal a bit of MP from the opponent", BATTLEACTION_MPDRAIN, MPDRAINI_SKILL, 15, 5, false, false)); // MPDRAINI_SKILL
     sSkillList.push(new Skill("MP Drain II", "Steal some of MP from the opponent", BATTLEACTION_MPDRAIN, MPDRAINII_SKILL, 30, 10, false, false)); // MPDRAINII_SKILL
+    sSkillList.push(new Skill("PhysReflect", "Reflect one physical attack from everyone", BATTLEACTION_REFLECT, PROTECT_SKILL, 1, 20, true, false)); // PROTECT_SKILL
+    sSkillList.push(new Skill("MagReflect", "Reflect one magical attack from everyone", BATTLEACTION_REFLECT, REFLECT_SKILL, 2, 30, true, false)); // REFLECT_SKILL
+    sSkillList.push(new Skill("Slow I", "Slow down an opponent by a bit for 3 turns", BATTLEACTION_SPEED, SLOWI_SKILL, 0.75, 30, false, false)); // SLOWI_SKILL
+    sSkillList.push(new Skill("Slow II", "Slow down an opponent by a lot for 3 turns", BATTLEACTION_SPEED, SLOWII_SKILL, 0.4, 60, false, false)); // SLOWII_SKILL
+    sSkillList.push(new Skill("Haste I", "Speed up an ally by a bit for 3 turns", BATTLEACTION_SPEED, HASTEI_SKILL, 1.35, 30, true, false)); // HASTEI_SKILL
+    sSkillList.push(new Skill("Haste II", "Speed up an ally by a lot for 3 turns", BATTLEACTION_SPEED, HASTEII_SKILL, 2.2, 60, true, false)); // HASTEII_SKILL
+    sSkillList.push(new Skill("Doom", "Reduce an opponent to 1HP/1MP", BATTLEACTION_DOOM, DOOM_SKILL, 0, 1, false, false)); // HASTEII_SKILL
 }
 
 function skillListToSkills(skillList) {

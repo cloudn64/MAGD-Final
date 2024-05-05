@@ -13,6 +13,9 @@ const BATTLEACTION_CHARGE = 5;
 const BATTLEACTION_ENRAGE = 6;
 const BATTLEACTION_REGEN = 7;
 const BATTLEACTION_MPDRAIN = 8;
+const BATTLEACTION_REFLECT = 9;
+const BATTLEACTION_SPEED = 10;
+const BATTLEACTION_DOOM = 11;
 
 const sBattleActionFuncs = [ 
     { init: attackActionInit, update: attackActionUpdate, draw: attackActionDraw, finish: attackActionFinish }, // Attack
@@ -24,6 +27,9 @@ const sBattleActionFuncs = [
     { init: enrageActionInit, update: enrageActionUpdate, draw: enrageActionDraw, finish: enrageActionFinish }, // Enrage Magic
     { init: regenActionInit, update: regenActionUpdate, draw: regenActionDraw, finish: regenActionFinish }, // Regen Magic
     { init: mpDrainActionInit, update: mpDrainActionUpdate, draw: mpDrainActionDraw, finish: mpDrainActionFinish }, // MP Drain Magic
+    { init: reflectActionInit, update: reflectActionUpdate, draw: reflectActionDraw, finish: reflectActionFinish }, // Reflect Magic
+    { init: speedActionInit, update: speedActionUpdate, draw: speedActionDraw, finish: speedActionFinish }, // Speed Magic
+    { init: doomActionInit, update: doomActionUpdate, draw: doomActionDraw, finish: doomActionFinish }, // Doom Magic
  ];
 
 class BattleAction {
@@ -181,7 +187,7 @@ function rangedAttackActionInit(action) {
 
 function rangedAttackActionUpdate(action) {
     if (!action.isInit) {
-        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
             action.isDone = true;
             return;
         }
@@ -245,7 +251,7 @@ function fireActionInit(action) {
 
 function fireActionUpdate(action) {
     if (!action.isInit) {
-        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
             action.isDone = true;
             return;
         }
@@ -326,6 +332,10 @@ function lifeActionInit(action) {
 
 function lifeActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.enraged > 0) { // not error nor bug. It is okay to use Heal magic while you are dying to save yourself from death.
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -384,6 +394,10 @@ function scanActionInit(action) {
 
 function scanActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -448,6 +462,10 @@ function chargeActionInit(action) {
 
 function chargeActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -506,6 +524,10 @@ function enrageActionInit(action) {
 
 function enrageActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -518,10 +540,15 @@ function enrageActionUpdate(action) {
         }
     }
 
+    if (action.timer == 20) {
+        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+    }
+
     if (action.timer == 100) {
         action.targetCharacter.enraged = magicActionGetPotency(action);
         addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, "ENRAGED!", '#FF0000FF');
         magicishNoise4.play();
+        action.targetCharacter.defaultAnim();
     }
 
     if (action.timer >= 160) {
@@ -538,7 +565,9 @@ function enrageActionFinish(action) {
     action.sourceCharacter.y = action.sourceStartPosY;
     action.targetCharacter.x = action.targetStartPosX;
     action.targetCharacter.y = action.targetStartPosY;
-    action.targetCharacter.defaultAnim();
+    if (action.targetCharacter.animation.anim != 0) {
+        action.targetCharacter.defaultAnim();
+    }
     action.sourceCharacter.defaultAnim();
     action.isDone = true;
 }
@@ -564,6 +593,10 @@ function regenActionInit(action) {
 
 function regenActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -619,6 +652,10 @@ function mpDrainActionInit(action) {
 
 function mpDrainActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -632,6 +669,10 @@ function mpDrainActionUpdate(action) {
         if ((action.timer % 5) == 0) {
             addParticle(action.targetCharacter.x, action.targetCharacter.y, action.sourceCharacter.x + random(-30, 30), action.sourceCharacter.y + random(-30, 30), 80, PARTICLE_MPDRAIN, "", '#FFFFFFFF');
         }
+    }
+
+    if (action.timer == 20 || action.timer == 60) {
+        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
     }
 
     if (action.timer == 100) {
@@ -654,6 +695,237 @@ function mpDrainActionDraw(action) {
 }
 
 function mpDrainActionFinish(action) {
+    action.sourceCharacter.x = action.sourceStartPosX;
+    action.sourceCharacter.y = action.sourceStartPosY;
+    action.targetCharacter.x = action.targetStartPosX;
+    action.targetCharacter.y = action.targetStartPosY;
+    action.targetCharacter.defaultAnim();
+    action.sourceCharacter.defaultAnim();
+    action.isDone = true;
+}
+
+/* REFLECT MAGIC */
+
+function reflectActionInit(action) {
+    var isPhysReflect = (magicActionGetPotency(action) == 1);
+
+    action.sourceStartPosX = action.sourceCharacter.x;
+    action.sourceStartPosY = action.sourceCharacter.y;
+    action.targetStartPosX = action.targetCharacter.x;
+    action.targetStartPosY = action.targetCharacter.y;
+
+    if (action.skillIndex == -1) {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+    } else {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
+    }
+
+    if (isPhysReflect) {
+        addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#00FF00FF');
+    } else {
+        addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FF00FFFF');
+    }
+    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
+}
+
+function reflectActionUpdate(action) {
+    var isPhysReflect = (magicActionGetPotency(action) == 1);
+    if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
+        action.isInit = true;
+        action.init(action);
+    }
+    action.timer++;
+
+    if (action.timer >= 20) {
+        if ((action.timer % 3) == 0) {
+            var xDir = random(-0.5, 0.5);
+            var yDir = random(-0.5, 0.5);
+            var color = ((isPhysReflect) ? '#00FF00' : '#FF00FF');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), xDir, yDir, 18, PARTICLE_REFLECT, "", color);
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), -xDir, yDir, 18, PARTICLE_REFLECT, "", color);
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), xDir, -yDir, 18, PARTICLE_REFLECT, "", color);
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), -xDir, -yDir, 18, PARTICLE_REFLECT, "", color);
+        }
+    }
+
+    if (action.timer == 20) {
+        magicishNoise8.play();
+    }
+
+    if (action.timer == 70) {
+        if (isPhysReflect) {
+            addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, "REFLECT!", '#00FF00FF');
+            action.targetCharacter.protect = true;
+        } else {
+            addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, "REFLECT!", '#FF00FFFF');
+            action.targetCharacter.reflect = true;
+        }
+        magicishNoise12.play();
+        action.targetCharacter.scanned = true;
+    }
+
+    if (action.timer >= 100) {
+        action.finish(action);
+    }
+}
+
+function reflectActionDraw(action) {
+
+}
+
+function reflectActionFinish(action) {
+    action.sourceCharacter.x = action.sourceStartPosX;
+    action.sourceCharacter.y = action.sourceStartPosY;
+    action.targetCharacter.x = action.targetStartPosX;
+    action.targetCharacter.y = action.targetStartPosY;
+    action.targetCharacter.defaultAnim();
+    action.sourceCharacter.defaultAnim();
+    action.isDone = true;
+}
+
+/* SPEED MAGIC */
+
+function speedActionInit(action) {
+    action.sourceStartPosX = action.sourceCharacter.x;
+    action.sourceStartPosY = action.sourceCharacter.y;
+    action.targetStartPosX = action.targetCharacter.x;
+    action.targetStartPosY = action.targetCharacter.y;
+
+    if (action.skillIndex == -1) {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+    } else {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
+    }
+    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FFFF00FF');
+    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
+}
+
+function speedActionUpdate(action) {
+    var isFast = (magicActionGetPotency(action) > 1.0) ? true : false;
+    if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
+        action.isInit = true;
+        action.init(action);
+    }
+    action.timer++;
+
+    if (action.timer >= 20) {
+        if ((action.timer % 3) == 0) {
+            if (isFast) {
+                var xDir = random(-2.3, 2.3);
+                var yDir = random(-2.3, 2.3);
+            } else {
+                var xDir = random(-0.2, 0.2);
+                var yDir = random(-0.2, 0.2);
+            }
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), xDir, yDir, 18, PARTICLE_TIME_SLOW, "", '#FFFFFFFF');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), -xDir, yDir, 18, PARTICLE_TIME_SLOW, "", '#FFFFFFFF');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), xDir, -yDir, 18, PARTICLE_TIME_SLOW, "", '#FFFFFFFF');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), -xDir, -yDir, 18, PARTICLE_TIME_SLOW, "", '#FFFFFFFF');
+        }
+    }
+
+    if (action.timer == 20) {
+        if (!isFast) {
+            action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        }
+    }
+
+    if (action.timer == 70) {
+        action.targetCharacter.speedTurns = 3;
+        action.targetCharacter.speedAmount = magicActionGetPotency(action);
+        if (isFast) {
+            magicishNoise2.play();
+            addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, "HASTE", '#00FF00FF');
+        } else {
+            magicishNoise.play();
+            addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, 1.9, 45, PARTICLE_TEXT, "SLOW", '#FFFFFFFF');
+        }
+    }
+
+    if (action.timer >= 100) {
+        action.finish(action);
+    }
+}
+
+function speedActionDraw(action) {
+
+}
+
+function speedActionFinish(action) {
+    action.sourceCharacter.x = action.sourceStartPosX;
+    action.sourceCharacter.y = action.sourceStartPosY;
+    action.targetCharacter.x = action.targetStartPosX;
+    action.targetCharacter.y = action.targetStartPosY;
+    action.targetCharacter.defaultAnim();
+    action.sourceCharacter.defaultAnim();
+    action.isDone = true;
+}
+
+/* DOOM MAGIC */
+
+function doomActionInit(action) {
+    action.sourceStartPosX = action.sourceCharacter.x;
+    action.sourceStartPosY = action.sourceCharacter.y;
+    action.targetStartPosX = action.targetCharacter.x;
+    action.targetStartPosY = action.targetCharacter.y;
+
+    if (action.skillIndex == -1) {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+    } else {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
+    }
+    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 280, PARTICLE_MAGIC, "", '#FFFFFFFF');
+    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
+}
+
+function doomActionUpdate(action) {
+    if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
+        action.isInit = true;
+        action.init(action);
+    }
+    action.timer++;
+
+    if (action.timer >= 20) {
+        var doomQuake = ((action.timer - 20) / 3);
+        action.targetCharacter.x = action.targetStartPosX + random(-doomQuake, doomQuake);
+        action.targetCharacter.y = action.targetStartPosY + random(-doomQuake, doomQuake);
+    }
+
+    if (action.timer == 20) {
+        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        horribleNoise.play();
+    }
+
+    if (action.timer >= 300) {
+        action.targetCharacter.hpTarget = 1;
+        action.targetCharacter.mpTarget = 1;
+        action.finish(action);
+    }
+}
+
+function doomActionDraw(action) {
+
+}
+
+function doomActionFinish(action) {
     action.sourceCharacter.x = action.sourceStartPosX;
     action.sourceCharacter.y = action.sourceStartPosY;
     action.targetCharacter.x = action.targetStartPosX;

@@ -18,6 +18,13 @@ const sPlayerSkillList = [
     REGENII_SKILL,
     MPDRAINI_SKILL,
     MPDRAINII_SKILL,
+    PROTECT_SKILL,
+    REFLECT_SKILL,
+    SLOWI_SKILL,
+    SLOWII_SKILL,
+    HASTEI_SKILL,
+    HASTEII_SKILL,
+    //DOOM_SKILL,
 ];
 
 class Character {
@@ -73,6 +80,10 @@ class Character {
         this.regenAmount = 0;
         this.poison = 0;
         this.poisonAmount = 0;
+        this.speedTurns = 0;
+        this.speedAmount = 0.0;
+        this.reflect = false;
+        this.protect = false;
 
         // gfx
         this.characterGfx = 0;
@@ -201,6 +212,10 @@ class Character {
             this.regenAmount = 0;
             this.poison = 0;
             this.poisonAmount = 0;
+            this.speedTurns = 0;
+            this.speedAmount = 0;
+            this.reflect = false;
+            this.protect = false;
             if (this.hp != 0) {
                 this.dead = false;
                 this.defaultAnim();
@@ -222,12 +237,18 @@ class Character {
         }
 
         if (!atbIsPaused/* && !this.isActing*/) { // update ATB if not doing an attack and the global ATB pause flag is not set
-            this.atbTimer = constrain(this.atbTimer + 1, 0, ATB_MAX - this.speed);
+            var atbIncreaseSpeed = 1;
+            if (this.speedTurns) atbIncreaseSpeed *= this.speedAmount;
+            this.atbTimer = constrain((this.atbTimer + atbIncreaseSpeed), this.atbTimer, (ATB_MAX - this.speed));
         }
+
 
         // per turn things
         if (atbIsFull && !this.turnFlag) {
             this.turnFlag = true;
+            if (this.speedTurns > 0) {
+                this.speedTurns--;
+            }
             if (this.poison > 0) {
                 var curPoisonAmount = this.applyUnblockableDamage(this.poisonAmount, 1);
                 this.poison--;

@@ -1,14 +1,17 @@
-const PARTICLE_TEXT = 0
-const PARTICLE_SKILL_TEXT = 1
-const PARTICLE_MAGIC = 2
-const PARTICLE_SMALL_FIRE = 3
-const PARTICLE_LIFE_SPARKLE = 4
-const PARTICLE_SCAN = 5
-const PARTICLE_MEDIUM_FIRE = 6
-const PARTICLE_LARGE_FIRE = 7
-const PARTICLE_CHARGE = 8
-const PARTICLE_RAGE = 9
-const PARTICLE_MPDRAIN = 10
+const PARTICLE_TEXT = 0;
+const PARTICLE_SKILL_TEXT = 1;
+const PARTICLE_MAGIC = 2;
+const PARTICLE_SMALL_FIRE = 3;
+const PARTICLE_LIFE_SPARKLE = 4;
+const PARTICLE_SCAN = 5;
+const PARTICLE_MEDIUM_FIRE = 6;
+const PARTICLE_LARGE_FIRE = 7;
+const PARTICLE_CHARGE = 8;
+const PARTICLE_RAGE = 9;
+const PARTICLE_MPDRAIN = 10;
+const PARTICLE_REFLECT = 11;
+const PARTICLE_TIME_SLOW = 12;
+const PARTICLE_TIME_FAST = 13;
 
 class Particle { // it refuses to accept that Particle is defined, so I named it Particle
     constructor(x, y, xVel, yVel, life, type, text, color) {
@@ -59,6 +62,18 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 this.animation = new SpriteAnimation("assets/particle/charge/", 0);
                 this.animation.changeAnim(0, 5, 0.4, true);
                 break;
+            case (PARTICLE_REFLECT):
+                this.animation = new SpriteAnimation("assets/particle/reflect/", 0);
+                this.animation.changeAnim(0, 6, 0.4, true);
+                break;
+            case (PARTICLE_TIME_SLOW):
+                this.animation = new SpriteAnimation("assets/particle/time/", 0);
+                this.animation.changeAnim(0, 7, 0.2, true);
+                break;
+            case (PARTICLE_TIME_FAST):
+                this.animation = new SpriteAnimation("assets/particle/time/", 0);
+                this.animation.changeAnim(0, 7, 0.5, true);
+                break;
         }
     }
 
@@ -84,6 +99,9 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
             case PARTICLE_RAGE:
             case PARTICLE_LIFE_SPARKLE:
             case PARTICLE_SCAN:
+            case PARTICLE_REFLECT:
+            case PARTICLE_TIME_FAST:
+            case PARTICLE_TIME_SLOW:
                 this.y += this.yVel;
                 this.yVel /= 1.02;
                 this.x += this.xVel;
@@ -132,8 +150,12 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
             case PARTICLE_LIFE_SPARKLE:
             case PARTICLE_CHARGE:
             case PARTICLE_MPDRAIN:
+            case PARTICLE_REFLECT:
                 this.animation.drawImpl(this.x, this.y, 0.5, 0.5, 0, this.color);
+                break;
             case PARTICLE_SCAN:
+            case PARTICLE_TIME_FAST:
+            case PARTICLE_TIME_SLOW:
                 this.animation.drawImpl(this.x, this.y, 0.2, 0.2, 0, this.color);
                 break;
         }
