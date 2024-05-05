@@ -2,6 +2,7 @@ var gamestate;
 var highscores;
 
 function preload() {
+  // Sound effects. I'm not sure if it's just smart, but I noticed I didn't actually have to create variables for these using 'let' or 'var', which is strange.
   optCycleNoise = loadSound("assets/sounds/cycleNoise.wav");
   optChooseNoise = loadSound("assets/sounds/selectNoise.wav");
   optNoNoise = loadSound("assets/sounds/noNoise.wav");
@@ -10,8 +11,13 @@ function preload() {
   dashNoise = loadSound("assets/sounds/dash.wav");
   attackishNoise3 = loadSound("assets/sounds/attackishNoise3.wav");
 
+  // Fonts
   gameFont = loadFont("assets/font/PressStart2P-vaV7.ttf");
 
+  // Music
+  battleTheme = loadSound("assets/music/battleTheme.wav");
+  gameOverTheme = loadSound("assets/music/gameOverTheme.wav");
+  victoryTheme = loadSound("assets/music/victoryTheme.wav");
 
 }
 

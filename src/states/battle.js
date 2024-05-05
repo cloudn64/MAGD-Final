@@ -32,13 +32,19 @@ class BattleState {
         this.battleActionQueue = new Array(); // Queue for battle actions from players
         this.particleQueue = new Array();
 
+        this.bgm = battleTheme;
+        this.fanfareFlag = false;
+
+        this.bgm.play();
+        this.bgm.loop();
+
     }
 
     setupBattle0() { // test battle
         this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 399, 1)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 180, 120, 0, 999, 1, 1, 140, 1)); // add player
         this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210, 9999, 999, 1, 1, 1, 1)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1000, 1, 199, 1)); // add enemy
+        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1000, 1, 399, 1000)); // add enemy
     }
 }
 
@@ -122,6 +128,19 @@ function battleUpdate(state) {
                 battle.allEnemiesDead = false;
             }
         }
+    }
+
+    if ((battle.allEnemiesDead || battle.allPlayersDead) && battle.battleActionQueue.length == 0) {
+        if (!battle.fanfareFlag) {
+            battle.fanfareFlag = true;
+            battle.bgm.stop();
+            if (battle.allEnemiesDead) {
+                victoryTheme.play();
+            } else if (battle.allPlayersDead) {
+                gameOverTheme.play();
+            }
+        }
+        battle.atbWait = true;
     }
 
     // update all characters
