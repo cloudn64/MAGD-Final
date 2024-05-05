@@ -32,13 +32,21 @@ class BattleState {
         this.battleActionQueue = new Array(); // Queue for battle actions from players
         this.particleQueue = new Array();
 
+        this.bgm = battleTheme;
+        this.fanfareFlag = false;
+
+        this.bgm.play();
+        this.bgm.loop(0, 1, 1);
+
     }
 
     setupBattle0() { // test battle
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60, 9999, 999, 1, 1, 399, 1)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero2", 180, 120, 0, 999, 1, 1, 140, 1)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210, 9999, 999, 1, 1, 1, 1)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemy", 480, 150, 2222, 128, 1000, 1, 199, 1)); // add enemy
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60,       /*maxHP*/2400,  /*maxMP*/200, /*str*/120,   /*def*/28,   /*spd*/50,    /*mag*/50,     sPlayerSkillList)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Ultiman", 180, 120,   /*maxHP*/3800,  /*maxMP*/350, /*str*/209,   /*def*/32,   /*spd*/80,    /*mag*/28,     sPlayerSkillList)); // add player
+        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210,     /*maxHP*/1900,  /*maxMP*/170, /*str*/80,    /*def*/10,   /*spd*/35,    /*mag*/92,     sPlayerSkillList)); // add player
+        this.characters.push(new Character(false, this.characterTotal++, "Enemyman", 480, 150,   /*maxMP*/12000, /*maxMP*/500, /*str*/99,    /*def*/50,   /*spd*/102,   /*mag*/99,     sPlayerSkillList)); // add enemy
+
+        this.characters[0].atbTimer = 400;
     }
 }
 
@@ -52,7 +60,7 @@ function battleInit(state) {
 }
 
 // selects a random target
-function getRandomTarget(targetPlayers, targetEnemies) {
+function getRandomTarget(targetPlayers, targetEnemies, targetDead) {
     var targetList = new Array();
 
     print("create targetList. Max: " + battle.characters.length);
@@ -60,7 +68,7 @@ function getRandomTarget(targetPlayers, targetEnemies) {
     for (var character = 0; character < battle.characters.length; character++) {
         var curCharacter = battle.characters[character];
 
-        if (curCharacter != null && !curCharacter.dead) {
+        if (curCharacter != null && ((!targetDead && !curCharacter.dead) || (targetDead && curCharacter.dead))) {
             if (curCharacter.isPlayer && targetPlayers) {
                // print("add player to targetList");
                 targetList.push(curCharacter);
@@ -122,6 +130,19 @@ function battleUpdate(state) {
                 battle.allEnemiesDead = false;
             }
         }
+    }
+
+    if ((battle.allEnemiesDead || battle.allPlayersDead) && battle.battleActionQueue.length == 0) {
+        if (!battle.fanfareFlag) {
+            battle.fanfareFlag = true;
+            battle.bgm.stop();
+            if (battle.allEnemiesDead) {
+                victoryTheme.play();
+            } else if (battle.allPlayersDead) {
+                gameOverTheme.play();
+            }
+        }
+        battle.atbWait = true;
     }
 
     // update all characters
@@ -246,13 +267,12 @@ function battleUpdate(state) {
             break;
     }
 
-    // Update Battle Actions - This loop won't happen if there aren't any in the queue.
-    // // it technically doesn't make sense for this to be a loop at all since it only updates index 0,
-    // then deletes it, moving index 1 down to index 0.
-    // However, this way it's convenient if I decide they can happen simultaneously.
+    // Update Battle Actions
+    // Updates the head battle action, then removes it from the queue
     battle.atbWait = false;
-    for (var actionIndex = 0; actionIndex < battle.battleActionQueue.length; actionIndex++) {
-        var battleAction = battle.battleActionQueue[actionIndex];
+    if (battle.battleActionQueue.length > 0) {
+        var battleAction = battle.battleActionQueue[0]; // head action
+        battle.atbWait = true;
         if (battleAction == null) { // this should be impossible
             print("null battle action destroyed (how did that happen?)");
             battle.battleActionQueue.shift();
@@ -261,9 +281,7 @@ function battleUpdate(state) {
             battle.battleActionQueue.shift();
         } else {
             //print("update battle action " + actionIndex);
-            battle.atbWait = true;
             battleAction.update(battleAction); // I don't know why I have to pass battleAction to this function, actually. Getting tired of JavaScript today
-            break;
         }
     }
 
@@ -279,20 +297,33 @@ function addBattleAction(id, source, target, skillIndex) {
     }
 }
 
-function addParticle(x, y, xVel, yVel, life, type, text) {
-    battle.particleQueue.push(new Particle(x, y, xVel, yVel, life, type, text));
+function addParticle(x, y, xVel, yVel, life, type, text, color) {
+    battle.particleQueue.push(new Particle(x, y, xVel, yVel, life, type, text, color));
 }
 
 // Or attack
 function activateSkill(source, target, skillIndex) {
     source.atbTimer = 0; // Spend the ATB
     if (skillIndex == -1) {
-        addBattleAction(0, source, target, -1);
+        if (source != target && target.protect) {
+            target.protect = false;
+            blockNoise.play();
+            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "BLOCK", '#FFFFFFFF');
+            addBattleAction(0, source, source, -1);
+        } else {
+            addBattleAction(0, source, target, -1);
+        }
         print(source.name + " ATTACKING " + target.name);
-
     } else {
         var skill = source.skills[skillIndex];
-        addBattleAction(skill.actionId, source, target, skillIndex);
+        if (source != target && target.reflect) {
+            target.reflect = false;
+            blockNoise.play();
+            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "BLOCK", '#FFFFFFFF');
+            addBattleAction(skill.actionId, source, source, skillIndex);
+        } else {
+            addBattleAction(skill.actionId, source, target, skillIndex);
+        }
         print(source.name + " CASTING " + skill.name + " ON " + target.name);
     }
 }
@@ -305,16 +336,13 @@ function activateDefend(source) {
 // This function runs after Update
 function battleDraw(state) {
     // Draw Battle Actions
-    // Still doesn't need to be a loop, check update loop for explanation
-    for (var actionIndex = 0; actionIndex < battle.battleActionQueue.length; actionIndex++) {
-        var battleAction = battle.battleActionQueue[actionIndex];
+    if (battle.battleActionQueue.length > 0) {
+        var battleAction = battle.battleActionQueue[0];
         if (battleAction == null) { // this should still be just as impossible as before
             print("null battle action destroyed (how did that happen?)");
             battle.battleActionQueue.shift();
         } else {
-            //print("draw battle action " + actionIndex);
             battleAction.draw(battleAction); // I don't know why I have to pass battleAction to this function, actually. Getting tired of JavaScript today
-            break;
         }
     }
     
@@ -329,11 +357,21 @@ function battleDraw(state) {
         }
     }
 
-    // draw particles
+    // draw particles that aren't PARTICLE_TEXT or PARTICLE_SKILL_TEXT
     // unlike the meaningless loop for the battle actions, this loop actually has a reason to exist
     for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
         var particle = battle.particleQueue[particleIndex];
-        particle.draw();
+        if (particle.type != PARTICLE_TEXT && particle.type != PARTICLE_SKILL_TEXT) {
+            particle.draw();
+        }
+    }
+
+    // draw particles that are PARTICLE_TEXT or PARTICLE_SKILL_TEXT
+    for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
+        var particle = battle.particleQueue[particleIndex];
+        if (particle.type == PARTICLE_TEXT || particle.type == PARTICLE_SKILL_TEXT) {
+            particle.draw();
+        }
     }
 
 

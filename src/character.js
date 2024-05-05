@@ -2,13 +2,33 @@ const ATB_MAX = 400;
 const DRAIN_SPEED = 10;
 
 const sPlayerSkillList = [
-    0,
-    1,
-    2,
-]
+    FIREI_SKILL,
+    FIREII_SKILL,
+    FIREIII_SKILL,
+    LIFEI_SKILL,
+    LIFEII_SKILL,
+    SCAN_SKILL,
+    HEALI_SKILL,
+    HEALII_SKILL,
+    HEALIII_SKILL,
+    CHARGE_SKILL,
+    ENRAGEI_SKILL,
+    ENRAGEII_SKILL,
+    REGENI_SKILL,
+    REGENII_SKILL,
+    MPDRAINI_SKILL,
+    MPDRAINII_SKILL,
+    PROTECT_SKILL,
+    REFLECT_SKILL,
+    SLOWI_SKILL,
+    SLOWII_SKILL,
+    HASTEI_SKILL,
+    HASTEII_SKILL,
+    //DOOM_SKILL,
+];
 
 class Character {
-    constructor(isPlayer, ID, name, x, y, maxHP, maxMP, str, def, spd, mag) { // ID should be assigned by the battle engine
+    constructor(isPlayer, ID, name, x, y, maxHP, maxMP, str, def, spd, mag, skillList) { // ID should be assigned by the battle engine
         this.isPlayer = isPlayer;
         this.name = name;
         this.ID = ID;
@@ -29,7 +49,7 @@ class Character {
         this.magic = mag; // Magic power
 
         // Skill pointer array created from skill list, points to skills inside global skill array
-        this.skills = skillListToSkills(sPlayerSkillList); // Kind of wild system, but wild is how we like it. Finished on time is even more how we like it.
+        this.skills = skillListToSkills(skillList); // Kind of wild system, but wild is how we like it. Finished on time is even more how we like it.
 
         // Menu for this character's skills (not created for enemies because they aren't controlled in the UI)
         // Having each player own a menu for this instead of one global menu reading data from the player is admittedly very strange
@@ -43,7 +63,6 @@ class Character {
         this.dead = false;
         this.defending = false;
         this.scanned = this.isPlayer; // shows this character's stats in menus. If false, only their name will appear.
-        this.scanned = true; // TEMP
 
         // ATB Timer
         this.atbTimer = 0;
@@ -51,6 +70,20 @@ class Character {
         // HP/MP Target- steps towards these so that when you lose something, the bar goes down instead of snapping to the new number.
         this.hpTarget = this.hp;
         this.mpTarget = this.mp;
+
+        this.turnFlag = false; // flag for things that occur once per turn (when the ATB is full)
+
+        // Effects
+        this.powerCharge = false;
+        this.enraged = 0;
+        this.regen = 0;
+        this.regenAmount = 0;
+        this.poison = 0;
+        this.poisonAmount = 0;
+        this.speedTurns = 0;
+        this.speedAmount = 0.0;
+        this.reflect = false;
+        this.protect = false;
 
         // gfx
         this.characterGfx = 0;
@@ -83,24 +116,72 @@ class Character {
         }
     }
 
+    attackRandomTarget() {
+        var attackTarget = getRandomTarget(!this.isPlayer, this.isPlayer, false);
+        if (attackTarget != null) {
+            activateSkill(this, attackTarget, -1);
+        }
+    }
+
+    checkForSpell(id) {
+        for (var s = 0; s < this.skills.length; s++) {
+            var thisSkill = this.skills[s];
+            if (thisSkill != null && thisSkill.skillId == id) {
+                return s;
+            }
+        }
+        return -1;
+    }
+
+    castIfAvailable(id) {
+        // check if I know an MP Drain spell
+        var foundSpell = this.checkForSpell(id);
+        if (foundSpell != -1 && (this.skills[foundSpell].mpCost <= this.mp)) {
+            var magicTarget = ((!this.isPlayer) 
+                    ? getRandomTarget(!this.skills[foundSpell].targetAllies, this.skills[foundSpell].targetAllies, this.skills[foundSpell].targetDead) 
+                    : getRandomTarget(this.skills[foundSpell].targetAllies, !this.skills[foundSpell].targetAllies, this.skills[foundSpell].targetDead));
+
+            activateSkill(this, magicTarget, foundSpell);
+            return true;
+        }
+        return false;
+    }
+
     // for the enemies
     pickRandomSkill() {
         this.atbTimer = 0;
-        var target = getRandomTarget(true, false);
-        if (target != null) {
-            if (random(0, 4) >= 2) { // greater chance to attack
-                activateSkill(this, getRandomTarget(true, false), -1);
-            } else { // magic
-                var randomSkill = (int)(random(0, this.skills.length));
 
-                print("I want skill " + randomSkill + " out of my " + this.skills.length + " skills!");
-                print("That's skill " + this.skills[randomSkill].name);
-                if (randomSkill >= this.skills.length || this.skills[randomSkill].mpCost > this.mp) { // bad skill or unaffordable skill
-                    activateSkill(this, getRandomTarget(true, false), -1);
-                    print("but it's too expensive!");
-                } else {
+        if (this.enraged != 0) {
+            this.attackRandomTarget();
+        // If I'm low on HP, try to heal. If I don't have enough MP, try to get more.
+        } else if ((this.hp < (this.maxHP / 10)) && (this.castIfAvailable(HEALIII_SKILL) || this.castIfAvailable(HEALII_SKILL) || this.castIfAvailable(HEALI_SKILL) || this.castIfAvailable(MPDRAINII_SKILL) || this.castIfAvailable(MPDRAINI_SKILL))) {
+            return;
+        } else if (random(0, 15) >= 13) { // low chance to defend (unless enraged)
+            activateDefend(this);
+        } else if (random(0, 8) >= 6) { // slightly greater chance to attack
+            this.attackRandomTarget();
+        } else { // magic
+            var randomSkill = (int)(random(0, this.skills.length));
+
+            print("I want skill " + randomSkill + " out of my " + this.skills.length + " skills!");
+            print("That's skill " + this.skills[randomSkill].name);
+            if (randomSkill >= this.skills.length || this.skills[randomSkill].mpCost > this.mp) { // bad skill or unaffordable skill
+                // attack if I can't steal MP
+                if (!this.castIfAvailable(MPDRAINII_SKILL) && !this.castIfAvailable(MPDRAINI_SKILL)) {
+                    this.attackRandomTarget();
+                }
+                print("but it's too expensive!");
+            } else {
+                var magicTarget = ((!this.isPlayer) 
+                    ? getRandomTarget(!this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetDead) 
+                    : getRandomTarget(this.skills[randomSkill].targetAllies, !this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetDead));
+                
+                if (magicTarget != null) {
+                    activateSkill(this, magicTarget, randomSkill);
                     print("here we go!");
-                    activateSkill(this, getRandomTarget(!this.skills[randomSkill].targetAllies, this.skills[randomSkill].targetAllies), randomSkill);
+                } else {
+                    print("no suitable target for my spell...?");
+                    this.attackRandomTarget();
                 }
             }
         }
@@ -108,19 +189,6 @@ class Character {
 
     update(atbIsPaused) {
         var atbIsFull = this.atbTimer >= (ATB_MAX - this.speed);
-        if (this.dead) {
-            this.animation.changeAnim(3, 0, 0.0, false);
-            this.atbTimer = 0;
-            this.isActing = false;
-            this.isReadyToAct = false;
-            return;
-        }
-
-        if (this.hp <= 0) {
-            this.hp = 0;
-            this.dead = true;
-            return;
-        }
 
         // approach HP target
         if (this.hpTarget > this.hp) { // get more HP
@@ -136,8 +204,68 @@ class Character {
             this.mp = constrain(this.mp - DRAIN_SPEED, this.mpTarget, this.mp);
         }
 
+        // Being dead
+        if (this.dead) {
+            this.powerCharge = false;
+            this.enraged = 0;
+            this.regen = 0;
+            this.regenAmount = 0;
+            this.poison = 0;
+            this.poisonAmount = 0;
+            this.speedTurns = 0;
+            this.speedAmount = 0;
+            this.reflect = false;
+            this.protect = false;
+            if (this.hp != 0) {
+                this.dead = false;
+                this.defaultAnim();
+            } else {
+                this.animation.changeAnim(3, 0, 0.0, false);
+                this.atbTimer = 0;
+                this.isActing = false;
+                this.isReadyToAct = false;
+                return;
+            }
+        }
+
+        // About to be dead
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this.regenAmount = 0;
+            this.dead = true;
+            return;
+        }
+
         if (!atbIsPaused/* && !this.isActing*/) { // update ATB if not doing an attack and the global ATB pause flag is not set
-            this.atbTimer = constrain(this.atbTimer + 1, 0, ATB_MAX - this.speed);
+            var atbIncreaseSpeed = 1;
+            if (this.speedTurns) atbIncreaseSpeed *= this.speedAmount;
+            this.atbTimer = constrain((this.atbTimer + atbIncreaseSpeed), this.atbTimer, (ATB_MAX - this.speed));
+        }
+
+
+        // per turn things
+        if (atbIsFull && !this.turnFlag) {
+            this.turnFlag = true;
+            if (this.speedTurns > 0) {
+                this.speedTurns--;
+            }
+            if (this.poison > 0) {
+                var curPoisonAmount = this.applyUnblockableDamage(this.poisonAmount, 1);
+                this.poison--;
+                addParticle(this.x + 20 + random(-7, 7), this.y - 30, 0, 1.9, 45, PARTICLE_TEXT, "-" + curPoisonAmount, '#0E660EFF');
+            }
+            if (this.regen > 0) {
+                var curRegenAmount = this.applyHealing(this.regenAmount, 1);
+                this.regen--;
+                magicishNoise11.play();
+                for (var p = 0; p < random(2, 5); p++) {
+                    addParticle(this.x, this.y, random(-2, 2), random(-2, 2), 80, PARTICLE_LIFE_SPARKLE, "", '#FFFFFFFF');
+                }
+                addParticle(this.x + 20 + random(-7, 7), this.y - 30, 0, -1.9, 45, PARTICLE_TEXT, curRegenAmount, '#00FF00FF');
+            }
+
+        } else if (!atbIsFull) {
+            this.turnFlag = false;
         }
 
         if (!atbIsFull && this.defending && !this.dead) {
@@ -147,7 +275,10 @@ class Character {
             this.defaultAnim();
         }
 
-        if (!this.isPlayer && atbIsFull) {
+        if (this.enraged > 0 && atbIsFull) {
+            this.pickRandomSkill();
+            this.enraged = constrain(this.enraged - 1, 0, this.enraged);
+        } else if (!this.isPlayer && atbIsFull) {
             this.pickRandomSkill();
         }
 
@@ -164,7 +295,22 @@ class Character {
     }
 
     draw() {
-        this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
+        var atbIsFull = this.atbTimer >= (ATB_MAX - this.speed);
+
+        if (this.poison > 0) {
+            this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#669966FF');
+        } else if (this.enraged > 0) {
+            if ((frameCount % (((int)(random(3, 8))) * 10)) == 0) {
+                addParticle(this.x + random(-20, 20), this.y + random(-35, -10), random(-1, 1), random(-1, -0.2), 80, PARTICLE_RAGE, "", '#FFFFFFFF');
+            }
+            this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#FF6666FF');
+        } else if (this.powerCharge) {
+            this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#BB66BBFF');
+        } else if (this.regen > 0) {
+            this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
+        } else {
+            this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
+        }
     }
 
     debugString(x, y) {
@@ -174,12 +320,29 @@ class Character {
     applyDamage(amount, strength) {
         var powerBonus = random(0.8, 1.2) + (strength / 50);
         var defenseNullifier = (random(1.0, 1.2) + (this.defense / 50));
-        var attackDamage = (int)(constrain(((amount * powerBonus) / defenseNullifier), 1, 9999));
+        var attackDamage = (int)(constrain(((amount * powerBonus) / defenseNullifier), 1, this.maxHP));
 
-        if (this.defending) attackDamage = (int)(attackDamage / 2); // cut damage in half if defending
+        if (this.defending) attackDamage = constrain((int)(attackDamage / 3), 0, (this.hp - 1)); // cut damage in third and survive with 1 HP if defending
 
         this.hpTarget = constrain(this.hpTarget - attackDamage, 0, this.maxHP);
         return attackDamage;
+    }
+
+    // I don't feel like adding an arg to applyDamage hahahehe
+    applyUnblockableDamage(amount, strength) {
+        var powerBonus = random(0.8, 1.2) + (strength / 50);
+        var attackDamage = (int)(constrain((amount * powerBonus), 1, this.maxHP));
+
+        this.hpTarget = constrain(this.hpTarget - attackDamage, 0, this.maxHP);
+        return attackDamage;
+    }
+
+    applyHealing(amount, strength) {
+        var powerBonus = random(0.8, 1.2) + (strength / 50);
+        var healPower = (int)(constrain((amount * powerBonus), 0, this.maxHP));
+
+        this.hpTarget = constrain(this.hpTarget + healPower, 0, this.maxHP);
+        return healPower;
     }
 
     applyMagic(amount) {

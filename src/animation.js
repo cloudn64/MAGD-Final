@@ -19,7 +19,7 @@ class SpriteAnimation {
         this.repeats = 0;
     }
 
-    draw(spriteX, spriteY, scaleX, scaleY, rotation) {
+    drawImpl(spriteX, spriteY, scaleX, scaleY, rotation, color) {
 
         // update the frame
         this.frameTimer += this.speed;
@@ -40,15 +40,19 @@ class SpriteAnimation {
 
         if (this.gfxDAsset.isLoaded) {
             var sprite = this.gfxDAsset.asset;
-            fill('#FFFFFFFF');
             push();
             translate(spriteX, spriteY);
             rotate(rotation);
             scale(scaleX, scaleY);
             imageMode(CENTER);
+            tint(color);
             image(sprite, 0, 0);
             pop();
         }
+    }
+
+    draw(spriteX, spriteY, scaleX, scaleY, rotation) {
+        this.drawImpl(spriteX, spriteY, scaleX, scaleY, rotation, '#FFFFFFFF');
     }
 
     changeAnim(ID, endFrame, speed, loop) {
