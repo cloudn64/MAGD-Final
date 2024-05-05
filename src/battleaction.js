@@ -121,7 +121,7 @@ function attackActionInit(action) {
     } else {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
-    action.sourceCharacter.animation.changeAnim(1, 6, 0.22, false);
+    action.sourceCharacter.attackAnim();
 }
 
 function attackActionUpdate(action) {
@@ -137,7 +137,7 @@ function attackActionUpdate(action) {
     if (action.timer == 20) {
         attackishNoise.play();
         var damage = actionApplyDamage(action, 70, action.sourceCharacter.strength);
-        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        action.targetCharacter.hurtAnim();
         addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
     }
     if (action.timer >= 20) {
@@ -150,7 +150,7 @@ function attackActionUpdate(action) {
         action.sourceCharacter.y = action.sourceStartPosY;
     }
 
-    if (action.timer >= 80 && action.targetCharacter.animation != 2) {
+    if (action.timer >= 80) {
         action.finish(action);
     }
 }
@@ -182,7 +182,7 @@ function rangedAttackActionInit(action) {
     } else {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
-    action.sourceCharacter.animation.changeAnim(1, 6, 0.22, false);
+    action.sourceCharacter.attackAnim();
 }
 
 function rangedAttackActionUpdate(action) {
@@ -198,7 +198,7 @@ function rangedAttackActionUpdate(action) {
     if (action.timer == 20) {
         attackishNoise.play();
         var damage = actionApplyDamage(action, 70, action.sourceCharacter.strength);
-        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        action.targetCharacter.hurtAnim();
         addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
     }
     if (action.timer >= 20) {
@@ -211,7 +211,7 @@ function rangedAttackActionUpdate(action) {
         action.sourceCharacter.y = action.sourceStartPosY;
     }
 
-    if (action.timer >= 80 && action.targetCharacter.animation != 2) {
+    if (action.timer >= 80) {
         action.finish(action);
     }
 }
@@ -244,7 +244,7 @@ function fireActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FF0000FF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -262,7 +262,7 @@ function fireActionUpdate(action) {
     if (action.timer == 20) {
         attackishNoise.play();
         var damage = actionApplyDamage(action, magicActionGetPotency(action), action.sourceCharacter.magic);
-        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        action.targetCharacter.hurtAnim();
         addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
     }
     if (action.timer >= 20) {
@@ -292,7 +292,7 @@ function fireActionUpdate(action) {
         action.sourceCharacter.y = action.sourceStartPosY;
     }
 
-    if (action.timer >= 80 && action.targetCharacter.animation != 2) {
+    if (action.timer >= 80) {
         action.finish(action);
     }
 }
@@ -325,7 +325,7 @@ function lifeActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#00FF00FF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -387,7 +387,7 @@ function scanActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FFFF00FF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -455,7 +455,7 @@ function chargeActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 130, PARTICLE_MAGIC, "", '#FF00FFFF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise5.play();
 }
@@ -517,7 +517,7 @@ function enrageActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 130, PARTICLE_MAGIC, "", '#FF0000FF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise3.play();
 }
@@ -541,7 +541,7 @@ function enrageActionUpdate(action) {
     }
 
     if (action.timer == 20) {
-        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        action.targetCharacter.hurtAnim();
     }
 
     if (action.timer == 100) {
@@ -586,7 +586,7 @@ function regenActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#00FF00FF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -645,7 +645,7 @@ function mpDrainActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FF00FFFF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -672,7 +672,7 @@ function mpDrainActionUpdate(action) {
     }
 
     if (action.timer == 20 || action.timer == 60) {
-        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        action.targetCharacter.hurtAnim();
     }
 
     if (action.timer == 100) {
@@ -725,7 +725,7 @@ function reflectActionInit(action) {
     } else {
         addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FF00FFFF');
     }
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -803,7 +803,7 @@ function speedActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FFFF00FF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -838,7 +838,7 @@ function speedActionUpdate(action) {
 
     if (action.timer == 20) {
         if (!isFast) {
-            action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+            action.targetCharacter.hurtAnim();
         }
     }
 
@@ -887,7 +887,7 @@ function doomActionInit(action) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 280, PARTICLE_MAGIC, "", '#FFFFFFFF');
-    action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
+    action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
@@ -910,7 +910,7 @@ function doomActionUpdate(action) {
     }
 
     if (action.timer == 20) {
-        action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
+        action.targetCharacter.hurtAnim();
         horribleNoise.play();
     }
 

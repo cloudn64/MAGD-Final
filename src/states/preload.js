@@ -25,7 +25,7 @@ function preloadInit(state) {
 // This function runs before Draw
 function preloadUpdate(state) {
     if (gamestate.transitionTarget == -1 && mouseIsPressed) {
-        state.transition(TITLE_STATE, 5, 255, 255, 255);
+        state.transition(TITLE_STATE, 5, 255, 255, 255, 0);
     }
 }
 

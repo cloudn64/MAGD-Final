@@ -26,7 +26,7 @@ const sGameStateFuncs = [
 // Base gamestate class
 class GameState {
     // Using an invalid value for stateId is UNSAFE-- but you won't do that, right? Why would you?
-    constructor(stateId) {
+    constructor(stateId, initArgs) {
         this.isInitialized; // does not run the draw or update when this is false. Is set to false by changed gamestates, true by init
         this.initFunc; // function pointer to gamestate initialization (more details in change function)
         this.drawFunc; // function pointer to gamestate drawing (more details in change function)
@@ -38,7 +38,10 @@ class GameState {
         this.transitionAlpha = 255; // Alpha of the transition. Is 255 because the start of the game is the end of a transition
         this.transitionColor = [255, 255, 255]; // RGB Color of the transition
 
-        this.change(stateId);
+        this.initArgs = initArgs;
+        this.transitionInitArgs = 0;
+
+        this.change(stateId, this.initArgs);
     }
 
     // Invoke non-null gamestate initialization function pointer
@@ -64,12 +67,13 @@ class GameState {
     }
 
     // swap gamestates
-    change(stateId) {
+    change(stateId, initArgs) {
         // Set to false by change of gamestate.
         // This is so a gamestate changed in the update function does not call the next state's draw function 
         // before it is updated once. Set to true at the start of a frame, then runs init.
         // If you only use transitions, that wouldn't happen, but-- I dunno. It's nice to be careful.
         this.isInitialized = false;
+        this.initArgs = initArgs;
 
         // Marks end of a transition
         this.transitionTarget = -1;
@@ -85,10 +89,11 @@ class GameState {
     }
 
     // transition to another gamestate
-    transition(stateId, speed, r, g, b) {
+    transition(stateId, speed, r, g, b, initArgs) {
         if (this.transitionTarget != -1) {
             return; // already in a transition!
         }
+        this.transitionInitArgs = initArgs;
         this.transitionTarget = stateId;
         this.transitionSpeed = speed;
         this.transitionColor[0] = r;

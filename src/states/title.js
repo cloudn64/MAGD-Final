@@ -25,7 +25,7 @@ function titleScreenUpdate(state) {
     title.temporaryButton.update();
 
     if (title.temporaryButton.click == true) {
-        state.transition(BATTLE_STATE, 5, 255, 255, 255);
+        state.transition(PREBATTLE_STATE, 5, 255, 255, 255, 77);
         title.temporaryButton.ignore = true;
     }
 }
@@ -50,7 +50,7 @@ function titleScreenDraw(state) {
 
     Here is code that will transition to the Pre-Battle screen:
 
-        state.transition(PREBATTLE_STATE, 5, 255, 255, 255);
+        state.transition(PREBATTLE_STATE, 5, 255, 255, 255, 0);
 
     And here is EXAMPLE code that will display the high scores:
 

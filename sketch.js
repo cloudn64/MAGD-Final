@@ -41,7 +41,7 @@ function preload() {
 function setup() {
   createCanvas(640, 480);
 
-  gamestate = new GameState(PRELOAD_STATE);
+  gamestate = new GameState(PRELOAD_STATE, 0);
   highscores = new HighscoreList("highscore.txt");
 
 }
@@ -62,7 +62,7 @@ function draw() {
   if (gamestate.transitionTarget != -1) { // Transition is active
     gamestate.transitionAlpha = constrain(gamestate.transitionAlpha + gamestate.transitionSpeed, 0, 255);
     if (gamestate.transitionAlpha >= 255) {
-      gamestate.change(gamestate.transitionTarget);
+      gamestate.change(gamestate.transitionTarget, gamestate.transitionInitArgs);
     }
   } else { // Transition is not active
     gamestate.transitionAlpha = constrain(gamestate.transitionAlpha - gamestate.transitionSpeed, 0, 255);

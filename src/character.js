@@ -1,6 +1,3 @@
-const ATB_MAX = 400;
-const DRAIN_SPEED = 10;
-
 const sPlayerSkillList = [
     FIREI_SKILL,
     FIREII_SKILL,
@@ -27,8 +24,11 @@ const sPlayerSkillList = [
     //DOOM_SKILL,
 ];
 
+const ATB_MAX = 400;
+const DRAIN_SPEED = 10;
+
 class Character {
-    constructor(isPlayer, ID, name, x, y, maxHP, maxMP, str, def, spd, mag, skillList) { // ID should be assigned by the battle engine
+    constructor(isPlayer, ID, name, graphics, x, y, maxHP, maxMP, str, def, spd, mag, skillList) { // ID should be assigned by the battle engine
         this.isPlayer = isPlayer;
         this.name = name;
         this.ID = ID;
@@ -86,8 +86,10 @@ class Character {
         this.protect = false;
 
         // gfx
-        this.characterGfx = 0;
-        this.animation = new SpriteAnimation("assets/characters/char" + this.characterGfx + "/", 0);
+        this.characterGfx = graphics;
+        if (this.characterGfx != -1) {
+            this.animation = new SpriteAnimation("assets/characters/char" + this.characterGfx + "/", 0);
+        }
         this.x = x;
         this.y = y;
         this.scaleX = 1;
@@ -99,13 +101,37 @@ class Character {
     }
 
     defaultAnim() {
-        if (!this.dead) {
+        if (!this.dead && !(this.characterGfx == -1)) {
             this.animation.changeAnim(0, 6, 0.02, true);
         }
     }
 
+    attackAnim() {
+        if (!this.dead && !(this.characterGfx == -1)) {
+            this.animation.changeAnim(1, 6, 0.22, false);
+        }
+    }
+
+    hurtAnim() {
+        if (!this.dead && !(this.characterGfx == -1)) {
+            this.animation.changeAnim(2, 1, 0.32, true);
+        }
+    }
+
+    deadAnim() {
+        if (this.dead && !(this.characterGfx == -1)) {
+            this.animation.changeAnim(3, 0, 0.0, false);
+        }
+    }
+
+    spellcastAnim() {
+        if (!this.dead && !(this.characterGfx == -1)) {
+            this.animation.changeAnim(4, 1, 0.12, true);
+        }
+    }
+
     defendAnim() {
-        if (!this.dead) {
+        if (!this.dead && !(this.characterGfx == -1)) {
             this.animation.changeAnim(5, 0, 0.0, false);
         }
     }
@@ -220,7 +246,7 @@ class Character {
                 this.dead = false;
                 this.defaultAnim();
             } else {
-                this.animation.changeAnim(3, 0, 0.0, false);
+                this.deadAnim();
                 this.atbTimer = 0;
                 this.isActing = false;
                 this.isReadyToAct = false;
@@ -303,13 +329,13 @@ class Character {
             if ((frameCount % (((int)(random(3, 8))) * 10)) == 0) {
                 addParticle(this.x + random(-20, 20), this.y + random(-35, -10), random(-1, 1), random(-1, -0.2), 80, PARTICLE_RAGE, "", '#FFFFFFFF');
             }
-            this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#FF6666FF');
+            if (this.characterGfx != -1) this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#FF6666FF');
         } else if (this.powerCharge) {
-            this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#BB66BBFF');
+            if (this.characterGfx != -1) this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#BB66BBFF');
         } else if (this.regen > 0) {
-            this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
+            if (this.characterGfx != -1) this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
         } else {
-            this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
+            if (this.characterGfx != -1) this.animation.draw(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation);
         }
     }
 
@@ -321,6 +347,10 @@ class Character {
         var powerBonus = random(0.8, 1.2) + (strength / 50);
         var defenseNullifier = (random(1.0, 1.2) + (this.defense / 50));
         var attackDamage = (int)(constrain(((amount * powerBonus) / defenseNullifier), 1, this.maxHP));
+
+        print(attackDamage + " HURT HURT HURT HURT HURT");
+        print(this.strength + " STR");
+        print(this.defense + " DEF");
 
         if (this.defending) attackDamage = constrain((int)(attackDamage / 3), 0, (this.hp - 1)); // cut damage in third and survive with 1 HP if defending
 

@@ -8,6 +8,19 @@
 
 var battle;
 
+// Initializes the battle
+class BattleInit {
+    constructor(battleId, party) {
+        this.battleId = battleId;
+        if (party == null) {
+            print("AAAAAAAAAAAAAAA");
+            this.party = new Array();
+        } else {
+            this.party = party;
+        }
+    }
+}
+
 class BattleState {
     constructor() {
         this.characters = new Array();
@@ -32,31 +45,55 @@ class BattleState {
         this.battleActionQueue = new Array(); // Queue for battle actions from players
         this.particleQueue = new Array();
 
-        this.bgm = battleTheme;
+        this.battleId = 0;
         this.fanfareFlag = false;
 
+    }
+
+    playBgm(soundFile) {
+        this.bgm = soundFile;
+        this.fanfareFlag = false;
         this.bgm.play();
         this.bgm.loop(0, 1, 1);
-
-    }
-
-    setupBattle0() { // test battle
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero", 130, 60,       /*maxHP*/2400,  /*maxMP*/200, /*str*/120,   /*def*/28,   /*spd*/50,    /*mag*/50,     sPlayerSkillList)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Ultiman", 180, 120,   /*maxHP*/3800,  /*maxMP*/350, /*str*/209,   /*def*/32,   /*spd*/80,    /*mag*/28,     sPlayerSkillList)); // add player
-        this.characters.push(new Character(true,  this.characterTotal++, "Hero3", 150, 210,     /*maxHP*/1900,  /*maxMP*/170, /*str*/80,    /*def*/10,   /*spd*/35,    /*mag*/92,     sPlayerSkillList)); // add player
-        this.characters.push(new Character(false, this.characterTotal++, "Enemyman", 480, 150,   /*maxMP*/12000, /*maxMP*/500, /*str*/99,    /*def*/50,   /*spd*/102,   /*mag*/99,     sPlayerSkillList)); // add enemy
-
-        this.characters[0].atbTimer = 400;
     }
 }
+
+const sPartyCoordinates = [
+    {x:130, y:60},
+    {x:180, y:120},
+    {x:150, y:210},
+
+]
 
 function battleInit(state) {
     state.stateObject = new BattleState();
     battle = state.stateObject;
-
+    initInfo = state.initArgs;
+    
     populateGlobalSkillList();
 
-    battle.setupBattle0();
+    battle.battleId = initInfo.battleId;
+
+    // Players
+    for (var partyMember = 0; partyMember < initInfo.party.length; partyMember++) {
+        if (initInfo.party[partyMember] >= 0) { // skip fake characters
+            battle.characters.push(createCharacter(true, initInfo.party[partyMember], sPartyCoordinates[partyMember].x, sPartyCoordinates[partyMember].y));
+        }
+    }
+
+    switch (initInfo.battleId) {
+        case 0:
+            setupTestBattle(battle);
+            battle.playBgm(battleTheme);
+            break;
+        case 1:
+            setupWaterBattle(battle);
+            battle.playBgm(ultimanTheme);
+            break;
+    }
+
+    // the first character will go right away
+    battle.characters[0].atbTimer = 400;
 }
 
 // selects a random target
