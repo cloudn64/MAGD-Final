@@ -4,7 +4,7 @@ const PARTICLE_MAGIC = 2
 const PARTICLE_SMALL_FIRE = 3
 
 class Particle { // it refuses to accept that Particle is defined, so I named it Particle
-    constructor(x, y, xVel, yVel, life, type, text) {
+    constructor(x, y, xVel, yVel, life, type, text, color) {
         this.x = x;
         this.y = y;
         this.xVel = xVel;
@@ -12,6 +12,7 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
         this.life = life;
         this.type = type;
         this.text = text;
+        this.color = color;
         this.animation = null;
 
         switch (this.type) {
@@ -68,7 +69,8 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 break;
             case PARTICLE_MAGIC:
             case PARTICLE_SMALL_FIRE:
-                this.animation.draw(this.x, this.y, 1, 1, 0);
+                fill(this.color);
+                this.animation.drawImpl(this.x, this.y, 1, 1, 0, this.color);
                 break;
         }
     }

@@ -10,6 +10,16 @@ function preload() {
   attackishNoise = loadSound("assets/sounds/attackishNoise.wav");
   dashNoise = loadSound("assets/sounds/dash.wav");
   attackishNoise3 = loadSound("assets/sounds/attackishNoise3.wav");
+  magicishNoise = loadSound("assets/sounds/magicishNoise.wav");
+  magicishNoise2 = loadSound("assets/sounds/magicishNoise2.wav");
+  magicishNoise3 = loadSound("assets/sounds/magicishNoise3.wav");
+  magicishNoise4 = loadSound("assets/sounds/magicishNoise4.wav");
+  magicishNoise5 = loadSound("assets/sounds/magicishNoise5.wav");
+  magicishNoise6 = loadSound("assets/sounds/magicishNoise6.wav");
+  magicishNoise7 = loadSound("assets/sounds/magicishNoise7.wav");
+  magicishNoise8 = loadSound("assets/sounds/magicishNoise8.wav");
+  magicishNoise9 = loadSound("assets/sounds/magicishNoise9.wav");
+  magicishNoise10 = loadSound("assets/sounds/magicishNoise10.wav");
 
   // Fonts
   gameFont = loadFont("assets/font/PressStart2P-vaV7.ttf");

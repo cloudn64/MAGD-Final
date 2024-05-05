@@ -265,13 +265,12 @@ function battleUpdate(state) {
             break;
     }
 
-    // Update Battle Actions - This loop won't happen if there aren't any in the queue.
-    // // it technically doesn't make sense for this to be a loop at all since it only updates index 0,
-    // then deletes it, moving index 1 down to index 0.
-    // However, this way it's convenient if I decide they can happen simultaneously.
+    // Update Battle Actions
+    // Updates the head battle action, then removes it from the queue
     battle.atbWait = false;
-    for (var actionIndex = 0; actionIndex < battle.battleActionQueue.length; actionIndex++) {
-        var battleAction = battle.battleActionQueue[actionIndex];
+    if (battle.battleActionQueue.length > 0) {
+        var battleAction = battle.battleActionQueue[0]; // head action
+        battle.atbWait = true;
         if (battleAction == null) { // this should be impossible
             print("null battle action destroyed (how did that happen?)");
             battle.battleActionQueue.shift();
@@ -280,9 +279,7 @@ function battleUpdate(state) {
             battle.battleActionQueue.shift();
         } else {
             //print("update battle action " + actionIndex);
-            battle.atbWait = true;
             battleAction.update(battleAction); // I don't know why I have to pass battleAction to this function, actually. Getting tired of JavaScript today
-            break;
         }
     }
 
@@ -298,8 +295,8 @@ function addBattleAction(id, source, target, skillIndex) {
     }
 }
 
-function addParticle(x, y, xVel, yVel, life, type, text) {
-    battle.particleQueue.push(new Particle(x, y, xVel, yVel, life, type, text));
+function addParticle(x, y, xVel, yVel, life, type, text, color) {
+    battle.particleQueue.push(new Particle(x, y, xVel, yVel, life, type, text, color));
 }
 
 // Or attack
@@ -324,16 +321,13 @@ function activateDefend(source) {
 // This function runs after Update
 function battleDraw(state) {
     // Draw Battle Actions
-    // Still doesn't need to be a loop, check update loop for explanation
-    for (var actionIndex = 0; actionIndex < battle.battleActionQueue.length; actionIndex++) {
-        var battleAction = battle.battleActionQueue[actionIndex];
+    if (battle.battleActionQueue.length > 0) {
+        var battleAction = battle.battleActionQueue[0];
         if (battleAction == null) { // this should still be just as impossible as before
             print("null battle action destroyed (how did that happen?)");
             battle.battleActionQueue.shift();
         } else {
-            //print("draw battle action " + actionIndex);
             battleAction.draw(battleAction); // I don't know why I have to pass battleAction to this function, actually. Getting tired of JavaScript today
-            break;
         }
     }
     

@@ -2,7 +2,7 @@
 const sBattleActionFuncs = [ 
     { init: attackActionInit, update: attackActionUpdate, draw: attackActionDraw, finish: attackActionFinish }, // Attack
     { init: rangedAttackActionInit, update: rangedAttackActionUpdate, draw: rangedAttackActionDraw, finish: rangedAttackActionFinish }, // Ranged Attack
-    { init: genericMagicActionInit, update: genericMagicActionUpdate, draw: genericMagicActionDraw, finish: genericMagicActionFinish }, // Generic Magic Attack
+    { init: fireActionInit, update: fireActionUpdate, draw: fireActionDraw, finish: fireActionFinish }, // Fire Magic Attack
  ];
 
 class BattleAction {
@@ -76,16 +76,16 @@ function attackActionInit(action) {
     }
 
     if (action.skillIndex == -1) {
-        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack", '#FFFFFFFF');
     } else {
-        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name);
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     action.sourceCharacter.animation.changeAnim(1, 6, 0.22, false);
 }
 
 function attackActionUpdate(action) {
     if (!action.isInit) {
-        if (action.sourceCharacter.hpTarget <= 0) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0) {
             action.isDone = true;
             return;
         }
@@ -97,7 +97,7 @@ function attackActionUpdate(action) {
         attackishNoise.play();
         var damage = action.targetCharacter.applyDamage(70, action.sourceCharacter.strength);
         action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage);
+        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
     }
     if (action.timer >= 20) {
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
@@ -137,15 +137,19 @@ function rangedAttackActionInit(action) {
     action.targetStartPosY = action.targetCharacter.y;
 
     if (action.skillIndex == -1) {
-        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack", '#FFFFFFFF');
     } else {
-        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name);
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
     action.sourceCharacter.animation.changeAnim(1, 6, 0.22, false);
 }
 
 function rangedAttackActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -154,7 +158,7 @@ function rangedAttackActionUpdate(action) {
         attackishNoise.play();
         var damage = action.targetCharacter.applyDamage(70, action.sourceCharacter.strength);
         action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage);
+        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
     }
     if (action.timer >= 20) {
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
@@ -187,7 +191,7 @@ function rangedAttackActionFinish(action) {
 
 /* GENERIC MAGIC ATTACK */
 
-function genericMagicActionInit(action) {
+function fireActionInit(action) {
     action.sourceStartPosX = action.sourceCharacter.x;
     action.sourceStartPosY = action.sourceCharacter.y;
     action.targetStartPosX = action.targetCharacter.x;
@@ -196,15 +200,20 @@ function genericMagicActionInit(action) {
     if (action.skillIndex == -1) {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
     } else {
-        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name);
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
-    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "");
+    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FF0000FF');
     action.sourceCharacter.animation.changeAnim(4, 1, 0.12, true);
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
 }
 
-function genericMagicActionUpdate(action) {
+function fireActionUpdate(action) {
     if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0) {
+            action.isDone = true;
+            return;
+        }
         action.isInit = true;
         action.init(action);
     }
@@ -213,12 +222,12 @@ function genericMagicActionUpdate(action) {
         attackishNoise.play();
         var damage = action.targetCharacter.applyDamage(magicActionGetPotency(action), action.sourceCharacter.magic);
         action.targetCharacter.animation.changeAnim(2, 1, 0.32, true);
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage);
+        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
     }
     if (action.timer >= 20) {
-        if (action.timer % 3) {
+        if (action.timer % 20) {
             attackishNoise3.play();
-            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-5, 5), random(-8, 1), 80, PARTICLE_SMALL_FIRE, "");
+            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-5, 5), random(-8, 1), 80, PARTICLE_SMALL_FIRE, "", '#FFFFFFFF');
         }
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
         action.targetCharacter.y = action.targetStartPosY + random(-9, 9);
@@ -234,11 +243,11 @@ function genericMagicActionUpdate(action) {
     }
 }
 
-function genericMagicActionDraw(action) {
+function fireActionDraw(action) {
 
 }
 
-function genericMagicActionFinish(action) {
+function fireActionFinish(action) {
     action.sourceCharacter.x = action.sourceStartPosX;
     action.sourceCharacter.y = action.sourceStartPosY;
     action.targetCharacter.x = action.targetStartPosX;
