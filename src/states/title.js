@@ -10,7 +10,7 @@ var title;
 
 class TitleState {
     constructor() {
-        this.temporaryButton = newButton("fbsdsdaflk", 20, 20, 200, 60, 45, LEFT, LEFT);
+        this.temporaryButton = newButton("START", 20, 20, 200, 60, 45, LEFT, LEFT);
     }
 }
 
@@ -35,7 +35,7 @@ function titleScreenDraw(state) {
     fill(2255, 255, 255);
     textAlign(CENTER);
     textSize(20);
-    text("placeholder title screen", width / 2, height / 2);
+    text("The Big Quest", width / 2, height / 2);
 
     title.temporaryButton.draw();
 }
