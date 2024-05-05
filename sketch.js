@@ -10,6 +10,8 @@ function preload() {
   dashNoise = loadSound("assets/sounds/dash.wav");
   attackishNoise3 = loadSound("assets/sounds/attackishNoise3.wav");
 
+  gameFont = loadFont("assets/font/PressStart2P-vaV7.ttf");
+
 
 }
 

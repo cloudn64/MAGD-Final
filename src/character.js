@@ -36,7 +36,7 @@ class Character {
         // However, this is what I did first, and it works.
         this.skillMenu = null;
         if (this.isPlayer) {
-            this.skillMenu = new SkillMenu(this, this.skills, 210, height - 159, width - 211, 158, 17, 8);
+            this.skillMenu = new SkillMenu(this, this.skills, 210, height - 159, width - 211, 158, 11, 8);
         }
 
         // Flags

@@ -22,10 +22,10 @@ class BattleState {
         this.statusMenu = new BattleStatus(210, height - 159, width - 211, 158, this);
         this.targetMenu = new BattleStatus(210, height - 159, width - 211, 158, this);
 
-        this.attackButton = newButton("Attack", 5, height - 155, 200, 30, 15, LEFT, LEFT);
-        this.skillButton = newButton("Magic", 5, height - 115, 200, 30, 15, LEFT, LEFT);
-        this.defendButton = newButton("Defend", 5, height - 75, 200, 30, 15, LEFT, LEFT);
-        this.buttonFour = newButton("Return", 5, height - 35, 200, 30, 15, LEFT, LEFT);
+        this.attackButton = newButton("Attack", 5, height - 155, 200, 30, 12, LEFT, LEFT);
+        this.skillButton = newButton("Magic", 5, height - 115, 200, 30, 12, LEFT, LEFT);
+        this.defendButton = newButton("Defend", 5, height - 75, 200, 30, 12, LEFT, LEFT);
+        this.buttonFour = newButton("Return", 5, height - 35, 200, 30, 12, LEFT, LEFT);
 
         this.chosenSkill = -1; // if -1, this is the "Attack" command.
 
@@ -343,7 +343,7 @@ function battleDraw(state) {
     // Tooltip
     noStroke();
     textAlign(LEFT, BOTTOM);
-    textSize(15);
+    textSize(8);
     fill('#FFFFFFFF');
     if (battle.uiCharacter != -1) {
         var thisCharacter = battle.characters[battle.uiCharacter];
@@ -380,10 +380,10 @@ function battleDraw(state) {
                     }
                     text(spell.description, 220, height - 160);
                 }
-                textSize(8);
-                fill('#FFFFFFFF');
-                textAlign(RIGHT, BOTTOM);
-                text("Scroll wheel if there's more spells", width - 5, height - 160);
+                //textSize(4);
+                //fill('#FFFFFFFF');
+                //textAlign(LEFT, BOTTOM);
+                //text("Scroll wheel if there's more spells", 220, height - 170);
             } else {
                 battle.uiPage = 0;
             }

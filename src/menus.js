@@ -56,7 +56,7 @@ class Button {
         this.pressOffsetY = 2; // Y offset when button is pressed down
 
         // Special cosmetic fields
-        this.font = null; // If not null, uses this font for the text
+        this.font = gameFont; // If not null, uses this font for the text
         this.image = null; // If not null, uses this image instead of a rectangle (still colors it with above colors)
 
         this.releaseSfx = null; // If not null, uses this sound when the button is released
@@ -261,6 +261,11 @@ class Menu {
         this.textSize = tTextSize;
         this.mpTextSize = tSubtextSize;
 
+        this.textDropShadow = true;
+        this.textShadowColor = '#000000CC';
+        this.lightSourceX = 2;
+        this.lightSourceY = 2;
+
         // p5js is poopy and web browsers are poopy so I have to create this here
         this.menuGraphics = createGraphics(this.width - (this.borderDensity * 2), this.height - (this.borderDensity * 2));
 
@@ -280,6 +285,8 @@ class Menu {
 
         this.scrollDelta = 0;
         this.scrollSpeed = 0.001;
+
+        this.font = gameFont;
 
         this.pressSfx = null; // If not null, uses this sound when the button is pressed
         this.releaseSfx = null; // If not null, uses this sound when the button is released
@@ -342,6 +349,10 @@ class Menu {
         
         /*  MENU CONTENTS  */
         this.menuGraphics.noStroke();
+        // Set text info
+        if (this.font != null) {
+            this.menuGraphics.textFont(this.font); // assumes this is a font and uses it
+        }
         for (var i = 0; i < this.options.length; i++) {
             var column = (int)(i / this.optionsPerRow);
             var bWidth = this.menuGraphics.width / this.optionsPerRow;
@@ -362,17 +373,29 @@ class Menu {
             }
             this.menuGraphics.rect(bX, bY, bWidth, bHeight);
 
+            var textColor = this.textColor;
             if (!this.options[i].available) {
-                this.menuGraphics.fill(this.unavailableTextColor);
-            } else {
-                this.menuGraphics.fill(this.textColor);
+                textColor = (this.unavailableTextColor);
             }
+
+            // Option Name Text
             this.menuGraphics.textSize(this.textSize);
             this.menuGraphics.textAlign(CENTER, CENTER);
-            // name text
+            if (this.textDropShadow) {
+                this.menuGraphics.fill(this.textShadowColor);
+                this.menuGraphics.text(this.options[i].name, bX + (bWidth / 2) + this.lightSourceX, bY + (bHeight / 2) + this.lightSourceY);
+            }
+            this.menuGraphics.fill(textColor);
             this.menuGraphics.text(this.options[i].name, bX + (bWidth / 2), bY + (bHeight / 2));
+            // Option MP (Subtext)
             this.menuGraphics.textSize(this.mpTextSize);
             this.menuGraphics.textAlign(RIGHT, BOTTOM);
+            if (this.textDropShadow) {
+                var subtextShadowMod = (this.textSize / this.mpTextSize);
+                this.menuGraphics.fill(this.textShadowColor);
+                this.menuGraphics.text(this.options[i].cost, bX + bWidth + (this.lightSourceX / subtextShadowMod), bY + bHeight + (this.lightSourceY / subtextShadowMod));
+            }
+            this.menuGraphics.fill(textColor);
             this.menuGraphics.text(this.options[i].cost, bX + bWidth, bY + bHeight);
         }
 
@@ -481,6 +504,11 @@ class BattleStatus {
         this.borderDensity = 4;
         this.border = true;
 
+        this.textDropShadow = true;
+        this.textShadowColor = '#000000CC';
+        this.lightSourceX = 2;
+        this.lightSourceY = 2;
+
         // p5js is poopy and web browsers are poopy so I have to create this here
         this.menuGraphics = createGraphics(this.width - (this.borderDensity * 2), this.height - (this.borderDensity * 2));
 
@@ -491,11 +519,12 @@ class BattleStatus {
         this.hold = false;
         this.draggedOff = false; // flag for misbehaving by dragging the held mouse onto another button
 
+        this.font = gameFont;
         this.pressSfx = null; // If not null, uses this sound when the button is pressed
         this.releaseSfx = null; // If not null, uses this sound when the button is released
         this.unavailableSfx = null; // If not null, uses this sound when the disabled button is pressed
 
-        this.nameTextSize = 15;
+        this.nameTextSize = 11;
         this.hpMpTextSize = 9;
 
         this.maxCharacters = 3;
@@ -591,6 +620,9 @@ class BattleStatus {
         for (var k = 0; k < this.maxCharacters; k++) {
             this.optCharacterIndex[k] = -1;
         }
+        if (this.font != null) {
+            this.menuGraphics.textFont(this.font); // assumes this is a font and uses it
+        }
         // draw each player character's stats (up to this.maxCharacters), also put ID of valid characters found into an array of options
         for (var i = 0; i < this.battleState.characters.length; i++) {
             var thisCharacter = this.battleState.characters[i];
@@ -627,10 +659,18 @@ class BattleStatus {
                 this.menuGraphics.rect(bX, bY, bWidth, bHeight);
             }
 
+            var nameHpTextColor = this.textColor;
+
             // ATB Bar
             if (thisCharacter.scanned) {
                 var atbBarScale = 7;
                 var atbBarHeight = (bHeight - (atbBarScale * 2));
+                // ATB Bar Shadow
+                if (this.textDropShadow) {
+                    this.menuGraphics.fill(this.textShadowColor);
+                    this.menuGraphics.rect(bX + 8 + this.lightSourceX, bY + atbBarScale + this.lightSourceY, 6, atbBarHeight);
+                }
+                // ATB Bar Background (Empty)
                 this.menuGraphics.fill('#333333FF');
                 this.menuGraphics.rect(bX + 8, bY + atbBarScale, 6, atbBarHeight);
                 // ATB Bar Fill
@@ -640,21 +680,22 @@ class BattleStatus {
 
                 // Name and HP text color
                 if (thisCharacter.dead) { // you are dead
-                    this.menuGraphics.fill(this.deadTextColor);
+                    nameHpTextColor = (this.deadTextColor);
                 } else if (thisCharacter.hp < (thisCharacter.maxHP / 10)) { // you have less than a tenth of your health
-                    this.menuGraphics.fill(this.unhealthyTextColor);
-                } else {
-                    this.menuGraphics.fill(this.textColor);
+                    nameHpTextColor = (this.unhealthyTextColor);
                 }
-            } else {
-                this.menuGraphics.fill(this.textColor);
             }
 
             var textOffset = 30;
 
             this.menuGraphics.textSize(this.nameTextSize);
             this.menuGraphics.textAlign(LEFT, CENTER);
-            // name text
+            // Name Text
+            if (this.textDropShadow) {
+                this.menuGraphics.fill(this.textShadowColor);
+                this.menuGraphics.text(thisCharacter.name, bX + textOffset + this.lightSourceX, bY + (bHeight / 2) + this.lightSourceY);
+            }
+            this.menuGraphics.fill(nameHpTextColor);
             this.menuGraphics.text(thisCharacter.name, bX + textOffset, bY + (bHeight / 2));
 
             if (thisCharacter.scanned) {
@@ -664,13 +705,27 @@ class BattleStatus {
 
                 this.menuGraphics.textSize(this.hpMpTextSize);
                 // HP Text and Bar
+                if (this.textDropShadow) {
+                    this.menuGraphics.fill(this.textShadowColor);
+                    this.menuGraphics.text(thisCharacter.hp + "/" + thisCharacter.maxHP + "HP", bX + statsOffset + this.lightSourceX, bY + (textSpaceCut) + this.lightSourceY);
+                }
+                this.menuGraphics.fill(nameHpTextColor);
                 this.menuGraphics.text(thisCharacter.hp + "/" + thisCharacter.maxHP + "HP", bX + statsOffset, bY + (textSpaceCut));
-                this.menuGraphics.fill('#222222CC');
+                if (this.textDropShadow) {
+                    this.menuGraphics.fill(this.textShadowColor);
+                    this.menuGraphics.rect(bX + statsOffset + this.lightSourceX, bY + (textSpaceCut * 2) - (textSpaceCut / 2) + this.lightSourceY, barLength, textSpaceCut / 2); // empty bar
+                }
+                this.menuGraphics.fill('#0E220EFF');
                 this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
                 var hpBarFill = (thisCharacter.hp / (thisCharacter.maxHP)) * barLength;
                 this.menuGraphics.fill('#00FF00FF');
                 this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 2) - (textSpaceCut / 2), hpBarFill, textSpaceCut / 2); // full bar
 
+                // MP Shadow
+                if (this.textDropShadow) {
+                    this.menuGraphics.fill(this.textShadowColor);
+                    this.menuGraphics.text(thisCharacter.mp + "/" + thisCharacter.maxMP + "MP", bX + statsOffset + this.lightSourceX, bY + (textSpaceCut * 3) + this.lightSourceY);
+                }
 
                 // MP text color
                 if (thisCharacter.dead || thisCharacter.mp == 0) { // you are dead or you have 0 MP
@@ -683,7 +738,11 @@ class BattleStatus {
 
                 // MP
                 this.menuGraphics.text(thisCharacter.mp + "/" + thisCharacter.maxMP + "MP", bX + statsOffset, bY + (textSpaceCut * 3));
-                this.menuGraphics.fill('#222222CC');
+                if (this.textDropShadow) {
+                    this.menuGraphics.fill(this.textShadowColor);
+                    this.menuGraphics.rect(bX + statsOffset + this.lightSourceX, bY + (textSpaceCut * 4) - (textSpaceCut / 2) + this.lightSourceY, barLength, textSpaceCut / 2); // empty bar
+                }
+                this.menuGraphics.fill('#220E22FF');
                 this.menuGraphics.rect(bX + statsOffset, bY + (textSpaceCut * 4) - (textSpaceCut / 2), barLength, textSpaceCut / 2); // empty bar
                 var mpBarFill = (thisCharacter.mp / (thisCharacter.maxMP)) * barLength;
                 this.menuGraphics.fill('#FF33FFFF');
