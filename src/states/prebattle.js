@@ -55,6 +55,7 @@ function preBattleDraw(state) {
     textAlign(CENTER);
     textSize(20);
     text("Select a Fight", width / 2, 60);
+    text("Party" + "\n" + "Select", 70, 310)
 
     preBattle.testBattleButton.draw();
     preBattle.waterBattleButton.draw();
