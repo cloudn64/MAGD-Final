@@ -25,13 +25,24 @@ const sHeroSkillList = [
     //DOOM_SKILL,
 ];
 
+// Water Skill List
+const sWaterSkillList = [
+    HEALII_SKILL,
+    REGENII_SKILL,
+    MPDRAINII_SKILL,
+    PROTECT_SKILL,
+    REFLECT_SKILL,
+    SLOWII_SKILL,
+    HASTEII_SKILL,
+];
+
 // Characters
 const sCharacters = [
     { name: "Hero", graphics:0, maxHP:2400, maxMP:200, str:120, def:28, spd:50, mag:50, skills:sHeroSkillList },
     { name: "Ultiman", graphics:0, maxHP:3800, maxMP:350, str:209, def:82, spd:80, mag:28, skills:sHeroSkillList },
     { name: "Hero3", graphics:0, maxHP:1900, maxMP:170, str:88, def:50, spd:130, mag:150, skills:sHeroSkillList },
     { name: "EnemyMan", graphics:0, maxHP:12000, maxMP:500, str:99, def:50, spd:102, mag:99, skills:sHeroSkillList },
-    { name: "Water", graphics:-1, maxHP:12000, maxMP:500, str:99, def:50, spd:102, mag:99, skills:sHeroSkillList },
+    { name: "Water", graphics:-1, maxHP:12000, maxMP:500, str:99, def:50, spd:102, mag:99, skills:sWaterSkillList },
 ]
 
 // Battles
