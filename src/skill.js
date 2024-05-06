@@ -62,7 +62,7 @@ function populateGlobalSkillList() {
     sSkillList.push(new Skill("Slow II", "Slow down an opponent by a lot for 3 turns", BATTLEACTION_SPEED, SLOWII_SKILL, 0.4, 60, false, false)); // SLOWII_SKILL
     sSkillList.push(new Skill("Haste I", "Speed up an ally by a bit for 3 turns", BATTLEACTION_SPEED, HASTEI_SKILL, 1.35, 30, true, false)); // HASTEI_SKILL
     sSkillList.push(new Skill("Haste II", "Speed up an ally by a lot for 3 turns", BATTLEACTION_SPEED, HASTEII_SKILL, 2.2, 60, true, false)); // HASTEII_SKILL
-    sSkillList.push(new Skill("Doom", "Reduce an opponent to 1HP/1MP", BATTLEACTION_DOOM, DOOM_SKILL, 0, 1, false, false)); // HASTEII_SKILL
+    sSkillList.push(new Skill("Doom", "Reduce an opponent to 1HP/1MP", BATTLEACTION_DOOM, DOOM_SKILL, 0, 999, false, false)); // HASTEII_SKILL
 }
 
 function skillListToSkills(skillList) {

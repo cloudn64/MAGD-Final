@@ -565,7 +565,7 @@ function enrageActionFinish(action) {
     action.sourceCharacter.y = action.sourceStartPosY;
     action.targetCharacter.x = action.targetStartPosX;
     action.targetCharacter.y = action.targetStartPosY;
-    if (action.targetCharacter.animation.anim != 0) {
+    if (action.targetCharacter.characterGfx != -1 && action.targetCharacter.animation.anim != 0) {
         action.targetCharacter.defaultAnim();
     }
     action.sourceCharacter.defaultAnim();
