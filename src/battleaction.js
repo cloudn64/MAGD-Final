@@ -553,6 +553,7 @@ function enrageActionUpdate(action) {
     }
 
     if (action.timer == 20) {
+        action.targetCharacter.defending = false;
         action.targetCharacter.hurtAnim();
     }
 

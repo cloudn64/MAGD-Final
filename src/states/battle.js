@@ -362,7 +362,7 @@ function activateSkill(source, target, skillIndex) {
         if (source != target && target.protect) {
             target.protect = false;
             blockNoise.play();
-            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "BLOCK", '#FFFFFFFF');
+            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "REFLECT", '#FFFFFFFF');
             addBattleAction(0, source, source, -1);
         } else {
             addBattleAction(0, source, target, -1);
@@ -373,7 +373,7 @@ function activateSkill(source, target, skillIndex) {
         if (source != target && target.reflect) {
             target.reflect = false;
             blockNoise.play();
-            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "BLOCK", '#FFFFFFFF');
+            addParticle(target.x + 30 + random(-16, 16), target.y, 0, -1.9, 45, PARTICLE_TEXT, "REFLECT", '#FFFFFFFF');
             addBattleAction(skill.actionId, source, source, skillIndex);
         } else {
             addBattleAction(skill.actionId, source, target, skillIndex);

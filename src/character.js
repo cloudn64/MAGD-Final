@@ -75,6 +75,11 @@ class Character {
     }
 
     defaultAnim() {
+        if (this.defending) {
+            this.defendAnim();
+            return;
+        }
+
         if (!this.dead && !(this.characterGfx == -1)) {
             switch (this.characterGfx) {
                 case 0: // default guy
@@ -89,31 +94,61 @@ class Character {
 
     attackAnim() {
         if (!this.dead && !(this.characterGfx == -1)) {
-            this.animation.changeAnim(1, 6, 0.22, false);
+            switch (this.characterGfx) {
+                case 0:
+                    this.animation.changeAnim(1, 6, 0.22, false);
+                    break;
+                case 1:
+                    this.animation.changeAnim(1, 9, 0.22, false);
+                    break;
+            }
         }
     }
 
     hurtAnim() {
         if (!this.dead && !(this.characterGfx == -1)) {
-            this.animation.changeAnim(2, 1, 0.32, true);
+            switch (this.characterGfx) {
+                case 0:
+                    this.animation.changeAnim(2, 1, 0.32, true);
+                    break;
+                case 1: // Unused Ultiman hurt animation
+                    //this.animation.changeAnim(2, 7, 1.22, true);
+                    break;
+
+            }
         }
     }
 
     deadAnim() {
         if (this.dead && !(this.characterGfx == -1)) {
-            this.animation.changeAnim(3, 0, 0.0, false);
+            switch (this.characterGfx) {
+                case 0:
+                case 1:
+                    this.animation.changeAnim(3, 0, 0.0, false);
+                    break;
+            }
         }
     }
 
     spellcastAnim() {
         if (!this.dead && !(this.characterGfx == -1)) {
-            this.animation.changeAnim(4, 1, 0.12, true);
+            switch (this.characterGfx) {
+                case 0:
+                case 1:
+                    this.animation.changeAnim(4, 1, 0.12, true);
+                    break;
+            }
         }
     }
 
     defendAnim() {
         if (!this.dead && !(this.characterGfx == -1)) {
-            this.animation.changeAnim(5, 0, 0.0, false);
+            switch (this.characterGfx) {
+                case 0:
+                case 1:
+                this.animation.changeAnim(5, 0, 0.0, false);
+                break;
+            }
         }
     }
 
@@ -303,6 +338,11 @@ class Character {
 
     draw() {
         var atbIsFull = this.atbTimer >= (ATB_MAX - this.speed);
+
+        if (this.characterGfx == 1 && this.isPlayer) { // party ultiman is slightly smaller
+            this.scaleX = 0.85;
+            this.scaleY = 0.85;
+        }
 
         if (this.poison > 0) {
             this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#669966FF');

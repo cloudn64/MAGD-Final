@@ -85,6 +85,11 @@ function setupWaterBattle(state) {
     
 }
 
+function setupUltimanBattle(state) {
+    // Enemies
+    state.characters.push(createCharacter(false, 1, 480, 150));
+}
+
 function createCharacter(isPlayer, ID, x, y) {
     var retCharacter = new Character(isPlayer, ID, sCharacters[ID].name, sCharacters[ID].graphics, x, y, sCharacters[ID].maxHP, sCharacters[ID].maxMP, sCharacters[ID].str, sCharacters[ID].def, sCharacters[ID].spd, sCharacters[ID].mag, sCharacters[ID].skills);
 
