@@ -36,6 +36,12 @@ function preload() {
   gameOverTheme = loadSound("assets/music/gameOverTheme.wav");
   victoryTheme = loadSound("assets/music/victoryTheme.wav");
 
+  // Backgrounds/Images
+  waterFightImg  = loadImage('assets/backgrounds/waterbottlefight.png');
+  waterFightEndImg = loadImage('assets/backgrounds/waterbottlefightend.png');
+  titleScreenImg = loadImage('assets/backgrounds/titlescreenbackground.png');
+  battleFieldImg = loadImage('assets/backgrounds/battlefieldbackground.png');
+
 }
 
 function setup() {

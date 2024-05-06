@@ -387,6 +387,11 @@ function activateDefend(source) {
 
 // This function runs after Update
 function battleDraw(state) {
+    
+    //making the Water guy appear
+    imageMode(CORNER);
+    image(waterFightImg, 0, 0, width, height/1.5);
+
     // Draw Battle Actions
     if (battle.battleActionQueue.length > 0) {
         var battleAction = battle.battleActionQueue[0];

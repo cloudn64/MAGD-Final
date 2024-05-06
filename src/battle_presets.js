@@ -81,6 +81,8 @@ function setupTestBattle(state) {
 function setupWaterBattle(state) {
     // Enemies
     state.characters.push(createCharacter(false, 4, 480, 150));
+    
+    
 }
 
 function createCharacter(isPlayer, ID, x, y) {
