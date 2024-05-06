@@ -37,8 +37,10 @@ function preload() {
   victoryTheme = loadSound("assets/music/victoryTheme.wav");
 
   // Backgrounds/Images
-  WaterFightImg  = loadImage('assets/backgrounds/waterbottlefight.png');
-  
+  waterFightImg  = loadImage('assets/backgrounds/waterbottlefight.png');
+  waterFightEndImg = loadImage('assets/backgrounds/waterbottlefightend.png');
+  titleScreenImg = loadImage('assets/backgrounds/titlescreenbackground.png');
+  battleFieldImg = loadImage('assets/backgrounds/battlefieldbackground.png');
 
 }
 

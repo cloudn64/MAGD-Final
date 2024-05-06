@@ -382,7 +382,7 @@ function battleDraw(state) {
     
     //making the Water guy appear
     imageMode(CORNER);
-    image(WaterFightImg, 0, 0, width, height/1.5);
+    image(waterFightImg, 0, 0, width, height/1.5);
 
     // Draw Battle Actions
     if (battle.battleActionQueue.length > 0) {
