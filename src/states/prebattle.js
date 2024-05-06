@@ -46,6 +46,11 @@ function preBattleUpdate(state) {
         preBattle.waterBattleButton.ignore = true;
     }
 
+   /* if (preBattle.partySelect1Button.click == true){
+      //  myParty.next
+    }
+    */
+
 }
 
 // This function runs after Update
