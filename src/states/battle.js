@@ -47,6 +47,7 @@ class BattleState {
 
         this.battleId = 0;
         this.fanfareFlag = false;
+        this.background = null;
 
         this.generalAlphaWave = 0; // a sine wave
         this.generalAlphaAngle = 0; // not actually an angle, but is named "angle" because it's being used in sine
@@ -69,10 +70,10 @@ const sPartyCoordinates = [
         [210, 270],
     ],
     [   // Water Battle
-        [230, 60],
-        [280, 90],
-        [250, 120],
-        [210, 180],
+        [90, 240],
+        [140, 280],
+        [200, 256],
+        [260, 266],
     ]
 ]
 
@@ -99,6 +100,7 @@ function battleInit(state) {
             break;
         case 1:
             setupWaterBattle(battle);
+            battle.background = waterFightImg;
             battle.playBgm(ultimanTheme);
             break;
     }
@@ -389,8 +391,10 @@ function activateDefend(source) {
 function battleDraw(state) {
     
     //making the Water guy appear
-    imageMode(CORNER);
-    image(waterFightImg, 0, 0, width, height/1.5);
+    if (battle.background != null) {
+        imageMode(CORNER);
+        image(waterFightImg, 0, 0, width, height/1.5);
+    }
 
     // Draw Battle Actions
     if (battle.battleActionQueue.length > 0) {
