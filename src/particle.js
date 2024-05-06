@@ -12,6 +12,8 @@ const PARTICLE_MPDRAIN = 10;
 const PARTICLE_REFLECT = 11;
 const PARTICLE_TIME_SLOW = 12;
 const PARTICLE_TIME_FAST = 13;
+const PARTICLE_WATER = 14;
+const PARTICLE_BASKETBALL = 15;
 
 class Particle { // it refuses to accept that Particle is defined, so I named it Particle
     constructor(x, y, xVel, yVel, life, type, text, color) {
@@ -74,6 +76,14 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 this.animation = new SpriteAnimation("assets/particle/time/", 0);
                 this.animation.changeAnim(0, 7, 0.5, true);
                 break;
+            case (PARTICLE_WATER):
+                this.animation = new SpriteAnimation("assets/particle/water/", 0);
+                this.animation.changeAnim(0, 7, 0.2, false);
+                break;
+            case (PARTICLE_BASKETBALL):
+                this.animation = new SpriteAnimation("assets/particle/basketball/", 0);
+                this.animation.changeAnim(0, 0, 0.0, false);
+                break;
         }
     }
 
@@ -114,6 +124,16 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
                 this.x -= speedX;
                 this.y -= speedY;
                 break;
+            case PARTICLE_WATER:
+                this.x -= this.xVel;
+                this.y -= this.yVel;
+                this.yVel = constrain(this.yVel - 0.23, -13, this.yVel);
+                break;
+            case PARTICLE_BASKETBALL:
+                this.x -= this.xVel;
+                this.y -= this.yVel;
+                this.yVel = constrain(this.yVel - 0.23, -13, this.yVel);
+                break;
 
         }
 
@@ -143,6 +163,8 @@ class Particle { // it refuses to accept that Particle is defined, so I named it
             case PARTICLE_SMALL_FIRE:
             case PARTICLE_MEDIUM_FIRE:
             case PARTICLE_LARGE_FIRE:
+            case PARTICLE_WATER:
+            case PARTICLE_BASKETBALL:
                 fill(this.color);
                 this.animation.drawImpl(this.x, this.y, 1, 1, 0, this.color);
                 break;

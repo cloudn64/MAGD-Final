@@ -83,6 +83,8 @@ class Character {
         if (!this.dead && !(this.characterGfx == -1)) {
             switch (this.characterGfx) {
                 case 0: // default guy
+                case 5:
+                case 6:
                     this.animation.changeAnim(0, 6, 0.02, true);
                     break;
                 case 1: // ultiman
@@ -96,6 +98,8 @@ class Character {
         if (!this.dead && !(this.characterGfx == -1)) {
             switch (this.characterGfx) {
                 case 0:
+                case 5:
+                case 6:
                     this.animation.changeAnim(1, 6, 0.22, false);
                     break;
                 case 1:
@@ -109,6 +113,8 @@ class Character {
         if (!this.dead && !(this.characterGfx == -1)) {
             switch (this.characterGfx) {
                 case 0:
+                case 5:
+                case 6:
                     this.animation.changeAnim(2, 1, 0.32, true);
                     break;
                 case 1: // Unused Ultiman hurt animation
@@ -124,6 +130,8 @@ class Character {
             switch (this.characterGfx) {
                 case 0:
                 case 1:
+                case 5:
+                case 6:
                     this.animation.changeAnim(3, 0, 0.0, false);
                     break;
             }
@@ -135,6 +143,8 @@ class Character {
             switch (this.characterGfx) {
                 case 0:
                 case 1:
+                case 5:
+                case 6:
                     this.animation.changeAnim(4, 1, 0.12, true);
                     break;
             }
@@ -146,6 +156,8 @@ class Character {
             switch (this.characterGfx) {
                 case 0:
                 case 1:
+                case 5:
+                case 6:
                 this.animation.changeAnim(5, 0, 0.0, false);
                 break;
             }
@@ -344,8 +356,16 @@ class Character {
             this.scaleY = 0.85;
         }
 
+        if (this.characterGfx == 5) { // annoy man is wide
+            this.scaleX = 1.2;
+            this.scaleY = 0.8;
+        } else if (this.characterGfx == 6) { // sad man is tall
+            this.scaleX = 0.8;
+            this.scaleY = 1.2;
+        }
+
         if (this.poison > 0) {
-            this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#669966FF');
+            if (this.characterGfx != -1) this.animation.drawImpl(this.x, this.y, this.scaleX * ((!this.isPlayer) ? -1 : 1), this.scaleY, this.rotation, '#669966FF');
         } else if (this.enraged > 0) {
             if ((frameCount % (((int)(random(3, 8))) * 10)) == 0) {
                 addParticle(this.x + random(-20, 20), this.y + random(-35, -10), random(-1, 1), random(-1, -0.2), 80, PARTICLE_RAGE, "", '#FFFFFFFF');

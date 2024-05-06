@@ -24,6 +24,9 @@ function preload() {
   magicishNoise10 = loadSound("assets/sounds/magicishNoise10.wav");
   magicishNoise11 = loadSound("assets/sounds/magicishNoise11.wav");
   magicishNoise12 = loadSound("assets/sounds/magicishNoise12.wav");
+  magicishNoise13 = loadSound('assets/sounds/magicishNoise13.wav');
+  magicishNoise14 = loadSound('assets/sounds/magicishNoise14.wav');
+  
   scanNoise = loadSound("assets/sounds/scanNoise.wav");
   horribleNoise = loadSound("assets/sounds/interestingSound.wav");
 
@@ -35,6 +38,7 @@ function preload() {
   ultimanTheme = createAudio("assets/music/ultimanTheme.wav");
   gameOverTheme = loadSound("assets/music/gameOverTheme.wav");
   victoryTheme = loadSound("assets/music/victoryTheme.wav");
+  stupidTheme = loadSound("assets/music/stupidTheme.wav");
 
   // Backgrounds/Images
   waterFightImg  = loadImage('assets/backgrounds/waterbottlefight.png');
@@ -42,6 +46,9 @@ function preload() {
   titleScreenImg = loadImage('assets/backgrounds/titlescreenbackground.png');
   battleFieldImg = loadImage('assets/backgrounds/battlefieldbackground.png');
   selectScreenImg = loadImage('assets/backgrounds/selectscreenbackground.png');
+  basketbalLCourtImg = loadImage('assets/backgrounds/basketball.png');
+  genericBattleImg = loadImage('assets/backgrounds/genericBattleBackground.png');
+  ultimanBattleImg = loadImage('assets/backgrounds/ultimanBattleBackground.png');
 
 }
 

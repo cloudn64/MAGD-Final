@@ -13,7 +13,6 @@ class BattleInit {
     constructor(battleId, party) {
         this.battleId = battleId;
         if (party == null) {
-            print("AAAAAAAAAAAAAAA");
             this.party = new Array();
         } else {
             this.party = party;
@@ -47,6 +46,7 @@ class BattleState {
 
         this.battleId = 0;
         this.fanfareFlag = false;
+        this.endingEventTimer = 0;
         this.background = null;
 
         this.generalAlphaWave = 0; // a sine wave
@@ -74,7 +74,19 @@ const sPartyCoordinates = [
         [140, 280],
         [200, 256],
         [260, 266],
-    ]
+    ],
+    [   // Ultiman
+        [130, 60],
+        [180, 120],
+        [150, 210],
+        [210, 270],
+    ],
+    [   // Basketball
+        [130, 90],
+        [180, 150],
+        [150, 230],
+        [210, 280],
+    ],
 ]
 
 function battleInit(state) {
@@ -97,16 +109,27 @@ function battleInit(state) {
         case 0:
             setupTestBattle(battle);
             battle.playBgm(battleTheme);
+            battle.background = genericBattleImg;
             break;
         case 1:
             setupWaterBattle(battle);
             battle.background = waterFightImg;
+            battle.playBgm(battleTheme);
+            break;
+        case 2:
+            setupUltimanBattle(battle);
             battle.playBgm(ultimanTheme);
+            battle.background = ultimanBattleImg;
+            break;
+        case 3:
+            setupBasketballBattle(battle);
+            battle.background = basketbalLCourtImg;
+            battle.playBgm(stupidTheme);
             break;
     }
 
     // the first character will go right away
-    battle.characters[0].atbTimer = 400;
+    battle.characters[0].atbTimer = (ATB_MAX - battle.characters[0].speed);
 }
 
 // selects a random target
@@ -342,7 +365,14 @@ function battleUpdate(state) {
         battle.background = waterFightEndImg;
     }
     if (battle.allPlayersDead || battle.allEnemiesDead) {
+        battle.endingEventTimer++;
         battle.atbWait = true;
+
+        if (battle.endingEventTimer >= 950 && battle.allPlayersDead) {
+            state.transition(PREBATTLE_STATE, 5, 0, 0, 0, 0);
+        } else if (battle.endingEventTimer >= 250 && battle.allEnemiesDead) {
+            state.transition(PREBATTLE_STATE, 5, 255, 255, 255, 0);
+        }
     }
 
 }
@@ -522,11 +552,19 @@ function battleDraw(state) {
     battle.defendButton.draw();
     battle.buttonFour.draw();
 
+    textAlign(CENTER);
+    textSize(30);
     if (!focused) {
-        textAlign(CENTER);
-        textSize(30);
         fill(255, 50 + (battle.generalAlphaWave * 4));
         text("Window\nUnfocused", width / 2, height / 2);
+        battle.generalAlphaWave = ((sin(battle.generalAlphaAngle++ / 20) + 1.5) * 20);
+    } else if (battle.allPlayersDead) {
+        fill(255, 120 + (battle.generalAlphaWave * 4));
+        text("Game Over...", width / 2, height / 2);
+        battle.generalAlphaWave = ((sin(battle.generalAlphaAngle++ / 20) + 1.5) * 20);
+    } else if (battle.allEnemiesDead) {
+        fill(255, 120 + (battle.generalAlphaWave * 4));
+        text("Victory!!", width / 2, height / 2);
         battle.generalAlphaWave = ((sin(battle.generalAlphaAngle++ / 20) + 1.5) * 20);
     } else {
         battle.generalAlphaWave = 0;

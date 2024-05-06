@@ -1,3 +1,9 @@
+/*
+Things I'd like to do someday (maybe in a remake?)
+Add a "favorite" stat to skills that changes the likelihood that they are used
+Make more of them
+*/
+
 const FIREI_SKILL = 0;
 const FIREII_SKILL = 1;
 const FIREIII_SKILL = 2;
@@ -21,6 +27,10 @@ const SLOWII_SKILL = 19;
 const HASTEI_SKILL = 20;
 const HASTEII_SKILL = 21;
 const DOOM_SKILL = 22;
+const POISONI_SKILL = 23;
+const POISONII_SKILL = 24;
+const WATER_SKILL = 25;
+const BASKETBALL_SKILL = 26;
 
 var sSkillList = [];
 
@@ -63,6 +73,10 @@ function populateGlobalSkillList() {
     sSkillList.push(new Skill("Haste I", "Speed up an ally by a bit for 3 turns", BATTLEACTION_SPEED, HASTEI_SKILL, 1.35, 30, true, false)); // HASTEI_SKILL
     sSkillList.push(new Skill("Haste II", "Speed up an ally by a lot for 3 turns", BATTLEACTION_SPEED, HASTEII_SKILL, 2.2, 60, true, false)); // HASTEII_SKILL
     sSkillList.push(new Skill("Doom", "Reduce an opponent to 1HP/1MP", BATTLEACTION_DOOM, DOOM_SKILL, 0, 999, false, false)); // HASTEII_SKILL
+    sSkillList.push(new Skill("Poison I", "Lose a bit of HP for 8 turns", BATTLEACTION_REGEN, POISONI_SKILL, -50, 15, false, false)); // POISONI_SKILL
+    sSkillList.push(new Skill("Poison II", "Lose some HP for 8 turns", BATTLEACTION_REGEN, POISONII_SKILL, -150, 30, false, false)); // POISONII_SKILL
+    sSkillList.push(new Skill("Water", "Splash the opponent with water", BATTLEACTION_WATER, WATER_SKILL, 150, 30, false, false)); // WATER_SKILL
+    sSkillList.push(new Skill("Basketball", "Summon a Basketball", BATTLEACTION_BASKETBALL, BASKETBALL_SKILL, 150, 0, false, false)); // BASKETBALL_SKILL
 }
 
 function skillListToSkills(skillList) {

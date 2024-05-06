@@ -16,6 +16,8 @@ const BATTLEACTION_MPDRAIN = 8;
 const BATTLEACTION_REFLECT = 9;
 const BATTLEACTION_SPEED = 10;
 const BATTLEACTION_DOOM = 11;
+const BATTLEACTION_WATER = 12;
+const BATTLEACTION_BASKETBALL = 13;
 
 const sBattleActionFuncs = [ 
     { init: attackActionInit, update: attackActionUpdate, draw: attackActionDraw, finish: attackActionFinish }, // Attack
@@ -30,6 +32,8 @@ const sBattleActionFuncs = [
     { init: reflectActionInit, update: reflectActionUpdate, draw: reflectActionDraw, finish: reflectActionFinish }, // Reflect Magic
     { init: speedActionInit, update: speedActionUpdate, draw: speedActionDraw, finish: speedActionFinish }, // Speed Magic
     { init: doomActionInit, update: doomActionUpdate, draw: doomActionDraw, finish: doomActionFinish }, // Doom Magic
+    { init: waterActionInit, update: waterActionUpdate, draw: waterActionDraw, finish: waterActionFinish }, // Water Magic
+    { init: basketballActionInit, update: basketballActionUpdate, draw: basketballActionDraw, finish: basketballActionFinish }, // Basketball Magic
  ];
 
 class BattleAction {
@@ -588,6 +592,7 @@ function enrageActionFinish(action) {
 /* REGEN MAGIC */
 
 function regenActionInit(action) {
+    var isPoison = (magicActionGetPotency(action) < 0);
     action.sourceStartPosX = action.sourceCharacter.x;
     action.sourceStartPosY = action.sourceCharacter.y;
     action.targetStartPosX = action.targetCharacter.x;
@@ -598,13 +603,21 @@ function regenActionInit(action) {
     } else {
         addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
     }
-    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#00FF00FF');
+
+    if (isPoison) {
+        addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#004400FF');
+    } else {
+        addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#00FF00FF');
+    }
+
     action.sourceCharacter.spellcastAnim();
     action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
     magicishNoise10.play();
 }
 
 function regenActionUpdate(action) {
+    var isPoison = (magicActionGetPotency(action) < 0);
+    
     if (!action.isInit) {
         if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
             action.isDone = true;
@@ -616,13 +629,21 @@ function regenActionUpdate(action) {
     action.timer++;
 
     if (action.timer == 40) {
-        action.targetCharacter.regenAmount = (magicActionGetPotency(action));
-        action.targetCharacter.regen = 8;
+        if (!isPoison) {
+            action.targetCharacter.regenAmount = (magicActionGetPotency(action));
+            action.targetCharacter.regen = 8;
 
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, "REGEN!", '#00FF00FF');
-        magicishNoise11.play();
-        addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-2, 2), random(-2, 2), 80, PARTICLE_LIFE_SPARKLE, "", '#FFFFFFFF');
-        magicishNoise12.play();
+            addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, "REGEN!", '#00FF00FF');
+            magicishNoise11.play();
+            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-2, 2), random(-2, 2), 80, PARTICLE_LIFE_SPARKLE, "", '#FFFFFFFF');
+            magicishNoise12.play();
+        } else {
+            action.targetCharacter.poisonAmount = (abs(magicActionGetPotency(action)));
+            action.targetCharacter.poison = 8;
+            addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, 1.9, 45, PARTICLE_TEXT, "POISON", '#004400FF');
+            addParticle(action.targetCharacter.x, action.targetCharacter.y, random(-2, 2), random(1, 2), 80, PARTICLE_LIFE_SPARKLE, "", '#FF66FFFF');
+            attackishNoise5.play();
+        }
     }
 
     if (action.timer >= 80) {
@@ -939,6 +960,162 @@ function doomActionDraw(action) {
 }
 
 function doomActionFinish(action) {
+    action.sourceCharacter.x = action.sourceStartPosX;
+    action.sourceCharacter.y = action.sourceStartPosY;
+    action.targetCharacter.x = action.targetStartPosX;
+    action.targetCharacter.y = action.targetStartPosY;
+    action.targetCharacter.defaultAnim();
+    action.sourceCharacter.defaultAnim();
+    action.isDone = true;
+}
+
+/* WATER MAGIC ATTACK */
+
+function waterActionInit(action) {
+    action.sourceStartPosX = action.sourceCharacter.x;
+    action.sourceStartPosY = action.sourceCharacter.y;
+    action.targetStartPosX = action.targetCharacter.x;
+    action.targetStartPosY = action.targetCharacter.y;
+
+    if (action.skillIndex == -1) {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+    } else {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
+    }
+    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FF0000FF');
+    action.sourceCharacter.spellcastAnim();
+    action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
+}
+
+function waterActionUpdate(action) {
+    if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
+        action.isInit = true;
+        action.init(action);
+    }
+    action.timer++;
+    if (action.timer == 60) {
+        attackishNoise.play();
+        var damage = actionApplyDamage(action, magicActionGetPotency(action), action.sourceCharacter.magic);
+        action.targetCharacter.hurtAnim();
+        var dmgX = action.targetCharacter.x + 30 + random(-16, 16);
+        addParticle(dmgX, action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
+        if (action.targetCharacter.hpTarget <= 0) {
+            addParticle(dmgX, action.targetCharacter.y + 10, 0, -1.9, 45, PARTICLE_TEXT, "FATAL", '#FFFF00EE');
+        }
+    }
+    if (action.timer >= 20) {
+        if ((action.timer % 3) == 0) {
+            var xDir = random(-1, 1);
+            var yDir = random(3, 6);
+
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), xDir, yDir, 80, PARTICLE_WATER, "", '#FFFFFFEE');
+            addParticle(action.targetCharacter.x + random(-25, 25), action.targetCharacter.y + random(-25, 25), -xDir, yDir, 80, PARTICLE_WATER, "", '#FFFFFFEE');
+        }
+        if ((action.timer % 6) == 0) {
+            magicishNoise13.play();
+        }
+
+        action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
+        action.targetCharacter.y = action.targetStartPosY + random(-9, 9);
+    }
+
+    if (action.timer >= 70) {
+        action.sourceCharacter.x = action.sourceStartPosX;
+        action.sourceCharacter.y = action.sourceStartPosY;
+    }
+
+    if (action.timer >= 80) {
+        action.finish(action);
+    }
+}
+
+function waterActionDraw(action) {
+
+}
+
+function waterActionFinish(action) {
+    action.sourceCharacter.x = action.sourceStartPosX;
+    action.sourceCharacter.y = action.sourceStartPosY;
+    action.targetCharacter.x = action.targetStartPosX;
+    action.targetCharacter.y = action.targetStartPosY;
+    action.targetCharacter.defaultAnim();
+    action.sourceCharacter.defaultAnim();
+    action.isDone = true;
+}
+
+/* BASKETBALL MAGIC ATTACK */
+
+function basketballActionInit(action) {
+    action.sourceStartPosX = action.sourceCharacter.x;
+    action.sourceStartPosY = action.sourceCharacter.y;
+    action.targetStartPosX = action.targetCharacter.x;
+    action.targetStartPosY = action.targetCharacter.y;
+
+    if (action.skillIndex == -1) {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, "Attack");
+    } else {
+        addParticle(width / 2, 20, 0, 0, 80, PARTICLE_SKILL_TEXT, action.sourceCharacter.skills[action.skillIndex].name, '#FFFFFFFF');
+    }
+    addParticle(action.sourceCharacter.x, action.sourceCharacter.y, 0, 0, 80, PARTICLE_MAGIC, "", '#FF0000FF');
+    action.sourceCharacter.spellcastAnim();
+    action.sourceCharacter.applyMagic(-magicActionGetMPCost(action));
+    magicishNoise10.play();
+}
+
+function basketballActionUpdate(action) {
+    if (!action.isInit) {
+        if (action.sourceCharacter.hpTarget <= 0 || action.targetCharacter.hpTarget <= 0 || action.sourceCharacter.enraged > 0) {
+            action.isDone = true;
+            return;
+        }
+        action.isInit = true;
+        action.init(action);
+    }
+    action.timer++;
+
+    if (action.timer >= 20) {
+        if ((action.timer % 10) == 0) {
+            magicishNoise14.play();
+            addParticle(action.targetCharacter.x + random(-10, 10), action.targetCharacter.y - 70 + random(-10, 10), random(-1, 1), random(-3, 1), 80, PARTICLE_BASKETBALL, "", '#FFFFFFEE');
+            addParticle(action.targetCharacter.x + random(-15, 15), action.targetCharacter.y - 70 + random(-15, 15), random(-2, 2), random(-6, 2), 80, PARTICLE_BASKETBALL, "", '#FFFFFFEE');
+        }
+        action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
+        action.targetCharacter.y = action.targetStartPosY + random(-9, 9);
+    }
+
+    if (action.timer >= 30) {
+        if ((action.timer % 10) == 0) {
+            attackishNoise.play();
+            var damage = actionApplyDamage(action, magicActionGetPotency(action), action.sourceCharacter.magic);
+            action.targetCharacter.hurtAnim();
+            var dmgX = action.targetCharacter.x + 30 + random(-16, 16);
+            addParticle(dmgX, action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
+            if (action.targetCharacter.hpTarget <= 0) {
+                addParticle(dmgX, action.targetCharacter.y + 10, 0, -1.9, 45, PARTICLE_TEXT, "FATAL", '#FFFF00EE');
+            }
+        }
+    }
+
+    if (action.timer >= 60) {
+        action.sourceCharacter.x = action.sourceStartPosX;
+        action.sourceCharacter.y = action.sourceStartPosY;
+    }
+
+    if (action.timer >= 100) {
+        action.finish(action);
+    }
+}
+
+function basketballActionDraw(action) {
+
+}
+
+function basketballActionFinish(action) {
     action.sourceCharacter.x = action.sourceStartPosX;
     action.sourceCharacter.y = action.sourceStartPosY;
     action.targetCharacter.x = action.targetStartPosX;

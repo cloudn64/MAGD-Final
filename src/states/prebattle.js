@@ -10,14 +10,15 @@ var preBattle;
 
 class PreBattleState {
     constructor() {
-        this.testBattleButton = newButton("Test", width / 2, 100, 200, 60, 45, CENTER, LEFT);
-        this.waterBattleButton = newButton("Water", width / 2, 210, 250, 60, 45, CENTER, LEFT);
-        this.partySelect1Button = newButton("1", 170, 280, 60, 60, 45, CENTER, LEFT);
-        this.partySelect2Button = newButton("2", 270, 280, 60, 60, 45, CENTER, LEFT);
-        this.partySelect3Button = newButton("3", 370, 280, 60, 60, 45, CENTER, LEFT);
-        this.partySelect4Button = newButton("4", 470, 280, 60, 60, 45, CENTER, LEFT);
+        this.testBattleButton = newButton("Normal Battle", width / 2, 100, 340, 60, 15, CENTER, LEFT);
+        this.waterBattleButton = newButton("Water Battle", width / 2, 190, 340, 60, 15, CENTER, LEFT);
+        this.basketballBattleButton = newButton("Basketball Battle", width / 2, 280, 340, 60, 15, CENTER, LEFT);
+        this.ultimanBattleButton = newButton("Ultiman Battle", width / 2, 370, 340, 60, 15, CENTER, LEFT);
 
-        this.myParty = [ 0, 1, 2, 3 ];
+        this.normalPartyButton = newButton("Normal\nParty", 70, 100, 110, 60, 15, CENTER, LEFT);
+        this.bonusPartyButton = newButton("BONUS\nParty", 70, 190, 110, 60, 15, CENTER, LEFT);
+
+        this.myParty = [ 0, 2, 7, 8 ];
     }
 }
 
@@ -30,26 +31,33 @@ function preBattleInit(state) {
 function preBattleUpdate(state) {
     preBattle.testBattleButton.update();
     preBattle.waterBattleButton.update();
-    // the party select buttons do nothing for now
-    preBattle.partySelect1Button.update();
-    preBattle.partySelect2Button.update();
-    preBattle.partySelect3Button.update();
-    preBattle.partySelect4Button.update();
+    preBattle.ultimanBattleButton.update();
+    preBattle.basketballBattleButton.update();
+    preBattle.normalPartyButton.update();
+    preBattle.bonusPartyButton.update();
 
-    if (preBattle.testBattleButton.click == true) {
+    if (preBattle.testBattleButton.click) {
         state.transition(BATTLE_STATE, 5, 255, 255, 255, new BattleInit(0, preBattle.myParty));
-        preBattle.testBattleButton.ignore = true;
-        preBattle.waterBattleButton.ignore = true;
-    } else if (preBattle.waterBattleButton.click == true) {
+    } else if (preBattle.waterBattleButton.click) {
         state.transition(BATTLE_STATE, 5, 255, 255, 255, new BattleInit(1, preBattle.myParty));
-        preBattle.testBattleButton.ignore = true;
-        preBattle.waterBattleButton.ignore = true;
+    } else if (preBattle.ultimanBattleButton.click) {
+        state.transition(BATTLE_STATE, 5, 255, 255, 255, new BattleInit(2, preBattle.myParty));
+    } else if (preBattle.basketballBattleButton.click) {
+        state.transition(BATTLE_STATE, 5, 255, 255, 255, new BattleInit(3, preBattle.myParty));
+    } else if (preBattle.normalPartyButton.click) {
+        preBattle.myParty = [ 0, 2, 7, 8 ];
+    } else if (preBattle.bonusPartyButton.click) {
+        preBattle.myParty = [ 1, 5, 6, 3 ];
     }
 
-   /* if (preBattle.partySelect1Button.click == true){
-      //  myParty.next
+    if (state.transitionTarget != -1) {
+        preBattle.testBattleButton.ignore = true;
+        preBattle.waterBattleButton.ignore = true;
+        preBattle.ultimanBattleButton.ignore = true;
+        preBattle.basketballBattleButton.ignore = true;
+        preBattle.normalPartyButton.ignore = true;
+        preBattle.bonusPartyButton.ignore = true;
     }
-    */
 
 }
 
@@ -60,13 +68,13 @@ function preBattleDraw(state) {
     textAlign(CENTER);
     textSize(20);
     text("Select a Fight", width / 2, 60);
-    text("Party" + "\n" + "Select", 70, 310)
+    text("Party" + "\n" + "Select", 70, 60)
 
     preBattle.testBattleButton.draw();
     preBattle.waterBattleButton.draw();
-    preBattle.partySelect1Button.draw();
-    preBattle.partySelect2Button.draw();
-    preBattle.partySelect3Button.draw();
-    preBattle.partySelect4Button.draw();
+    preBattle.ultimanBattleButton.draw();
+    preBattle.basketballBattleButton.draw();
+    preBattle.normalPartyButton.draw();
+    preBattle.bonusPartyButton.draw();
 
 }
