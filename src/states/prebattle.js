@@ -41,6 +41,7 @@ function preBattleUpdate(state) {
 
 // This function runs after Update
 function preBattleDraw(state) {
+    image(selectScreenImg, 0,0, width, height)
     fill(2255, 255, 255);
     textAlign(CENTER);
     textSize(20);
