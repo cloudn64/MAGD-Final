@@ -76,7 +76,14 @@ class Character {
 
     defaultAnim() {
         if (!this.dead && !(this.characterGfx == -1)) {
-            this.animation.changeAnim(0, 6, 0.02, true);
+            switch (this.characterGfx) {
+                case 0: // default guy
+                    this.animation.changeAnim(0, 6, 0.02, true);
+                    break;
+                case 1: // ultiman
+                    this.animation.changeAnim(0, 3, 0.09, true);
+                    break;
+            }
         }
     }
 

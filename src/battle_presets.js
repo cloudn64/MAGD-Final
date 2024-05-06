@@ -66,7 +66,7 @@ const sWaterSkillList = [
 // Characters
 const sCharacters = [
     { name: "Hero", graphics:0, maxHP:2400, maxMP:200, str:120, def:28, spd:50, mag:50, skills:sHeroSkillList },
-    { name: "Ultiman", graphics:0, maxHP:32280, maxMP:1800, str:550, def:220, spd:250, mag:170, skills:sUltimanSkillList },
+    { name: "Ultiman", graphics:1, maxHP:32280, maxMP:1800, str:550, def:220, spd:250, mag:170, skills:sUltimanSkillList },
     { name: "Hero3", graphics:0, maxHP:1900, maxMP:170, str:88, def:50, spd:130, mag:150, skills:sHeroSkillList },
     { name: "EnemyMan", graphics:0, maxHP:12000, maxMP:500, str:99, def:50, spd:102, mag:99, skills:sHeroSkillList },
     { name: "Water", graphics:-1, maxHP:12000, maxMP:500, str:99, def:50, spd:102, mag:99, skills:sWaterSkillList },
