@@ -32,10 +32,11 @@ function titleScreenUpdate(state) {
 
 // This function runs after Update. Use this for drawing things
 function titleScreenDraw(state) {
+    image(titleScreenImg, 0, 0, width, height);
     fill(2255, 255, 255);
     textAlign(CENTER);
     textSize(35);
-    text("The Big Quest", width / 2, height / 2);
+    text("Fight Game", width / 2, height / 2.2);
 
     title.temporaryButton.draw();
 }
