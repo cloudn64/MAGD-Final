@@ -48,6 +48,9 @@ class BattleState {
         this.battleId = 0;
         this.fanfareFlag = false;
 
+        this.generalAlphaWave = 0; // a sine wave
+        this.generalAlphaAngle = 0; // not actually an angle, but is named "angle" because it's being used in sine
+
     }
 
     playBgm(soundFile) {
@@ -142,6 +145,10 @@ function updateTargetingMode() {
 // This function runs before Draw
 function battleUpdate(state) {
     // battle is running.
+
+    if (!focused) {
+        return;
+    }
 
     // update particles
     // unlike the meaningless loop for the battle actions, this loop actually has a reason to exist
@@ -396,18 +403,20 @@ function battleDraw(state) {
 
     // draw particles that aren't PARTICLE_TEXT or PARTICLE_SKILL_TEXT
     // unlike the meaningless loop for the battle actions, this loop actually has a reason to exist
-    for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
-        var particle = battle.particleQueue[particleIndex];
-        if (particle.type != PARTICLE_TEXT && particle.type != PARTICLE_SKILL_TEXT) {
-            particle.draw();
+    if (focused) { // we can't draw particles when the window isn't focused because Chrome can't handle all of the DAssets
+        for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
+            var particle = battle.particleQueue[particleIndex];
+            if (particle.type != PARTICLE_TEXT && particle.type != PARTICLE_SKILL_TEXT) {
+                particle.draw();
+            }
         }
-    }
 
-    // draw particles that are PARTICLE_TEXT or PARTICLE_SKILL_TEXT
-    for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
-        var particle = battle.particleQueue[particleIndex];
-        if (particle.type == PARTICLE_TEXT || particle.type == PARTICLE_SKILL_TEXT) {
-            particle.draw();
+        // draw particles that are PARTICLE_TEXT or PARTICLE_SKILL_TEXT
+        for (var particleIndex = 0; particleIndex < battle.particleQueue.length; particleIndex++) {
+            var particle = battle.particleQueue[particleIndex];
+            if (particle.type == PARTICLE_TEXT || particle.type == PARTICLE_SKILL_TEXT) {
+                particle.draw();
+            }
         }
     }
 
@@ -492,4 +501,15 @@ function battleDraw(state) {
     battle.skillButton.draw();
     battle.defendButton.draw();
     battle.buttonFour.draw();
+
+    if (!focused) {
+        textAlign(CENTER);
+        textSize(30);
+        fill(255, 50 + (battle.generalAlphaWave * 4));
+        text("Window\nUnfocused", width / 2, height / 2);
+        battle.generalAlphaWave = ((sin(battle.generalAlphaAngle++ / 20) + 1.5) * 20);
+    } else {
+        battle.generalAlphaWave = 0;
+        battle.generalAlphaAngle = 0;
+    }
 }
