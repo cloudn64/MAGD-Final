@@ -62,7 +62,7 @@ const sPartyCoordinates = [
     {x:130, y:60},
     {x:180, y:120},
     {x:150, y:210},
-
+    {x:210, y:270},
 ]
 
 function battleInit(state) {
