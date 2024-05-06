@@ -138,7 +138,11 @@ function attackActionUpdate(action) {
         attackishNoise.play();
         var damage = actionApplyDamage(action, 70, action.sourceCharacter.strength);
         action.targetCharacter.hurtAnim();
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
+        var dmgX = action.targetCharacter.x + 30 + random(-16, 16);
+        addParticle(dmgX, action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
+        if (action.targetCharacter.hpTarget <= 0) {
+            addParticle(dmgX, action.targetCharacter.y + 10, 0, -1.9, 45, PARTICLE_TEXT, "FATAL", '#FF0000EE');
+        }
     }
     if (action.timer >= 20) {
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
@@ -199,7 +203,11 @@ function rangedAttackActionUpdate(action) {
         attackishNoise.play();
         var damage = actionApplyDamage(action, 70, action.sourceCharacter.strength);
         action.targetCharacter.hurtAnim();
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
+        var dmgX = action.targetCharacter.x + 30 + random(-16, 16);
+        addParticle(dmgX, action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
+        if (action.targetCharacter.hpTarget <= 0) {
+            addParticle(dmgX, action.targetCharacter.y + 10, 0, -1.9, 45, PARTICLE_TEXT, "FATAL", '#FF0000EE');
+        }
     }
     if (action.timer >= 20) {
         action.targetCharacter.x = action.targetStartPosX + random(-9, 9);
@@ -263,7 +271,11 @@ function fireActionUpdate(action) {
         attackishNoise.play();
         var damage = actionApplyDamage(action, magicActionGetPotency(action), action.sourceCharacter.magic);
         action.targetCharacter.hurtAnim();
-        addParticle(action.targetCharacter.x + 30 + random(-16, 16), action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFFF');
+        var dmgX = action.targetCharacter.x + 30 + random(-16, 16);
+        addParticle(dmgX, action.targetCharacter.y, 0, -1.9, 45, PARTICLE_TEXT, damage, '#FFFFFFEE');
+        if (action.targetCharacter.hpTarget <= 0) {
+            addParticle(dmgX, action.targetCharacter.y + 10, 0, -1.9, 45, PARTICLE_TEXT, "FATAL", '#FFFF00EE');
+        }
     }
     if (action.timer >= 20) {
         if ((action.timer % 10) == 0) {

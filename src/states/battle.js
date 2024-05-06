@@ -384,6 +384,7 @@ function activateSkill(source, target, skillIndex) {
 
 function activateDefend(source) {
     source.atbTimer = 0; // Spend the ATB
+    addParticle(source.x + 30 + random(-16, 16), source.y, 0, -1.9, 45, PARTICLE_TEXT, "DEFEND", '#FFFFFFFF');
     source.defending = true;
 }
 
@@ -393,7 +394,7 @@ function battleDraw(state) {
     //making the Water guy appear
     if (battle.background != null) {
         imageMode(CORNER);
-        image(waterFightImg, 0, 0, width, height/1.5);
+        image(battle.background, 0, 0, width, height/1.5);
     }
 
     // Draw Battle Actions

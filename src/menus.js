@@ -572,7 +572,8 @@ class BattleStatus {
     }
 
     canTargetLifeStatus(character) {
-        return ((this.targetDead && character.dead) || (!this.targetDead && !character.dead));
+        var characterIsDead = (character.dead || character.hpTarget <= 0 || character.hp <= 0);
+        return ((this.targetDead && character.dead) || (!this.targetDead && !characterIsDead));
     }
 
     draw() {
