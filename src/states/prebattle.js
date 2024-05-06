@@ -13,7 +13,7 @@ class PreBattleState {
         this.testBattleButton = newButton("Test", width / 2, 100, 200, 60, 45, CENTER, LEFT);
         this.waterBattleButton = newButton("Water", width / 2, 210, 200, 60, 45, CENTER, LEFT);
 
-        this.myParty = [ 0, 1, 2 ];
+        this.myParty = [ 0, 1, 2, 3 ];
     }
 }
 

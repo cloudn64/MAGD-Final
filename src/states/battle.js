@@ -62,10 +62,18 @@ class BattleState {
 }
 
 const sPartyCoordinates = [
-    {x:130, y:60},
-    {x:180, y:120},
-    {x:150, y:210},
-    {x:210, y:270},
+    [   // Battle 0
+        [130, 60],
+        [180, 120],
+        [150, 210],
+        [210, 270],
+    ],
+    [   // Water Battle
+        [230, 60],
+        [280, 90],
+        [250, 120],
+        [210, 180],
+    ]
 ]
 
 function battleInit(state) {
@@ -78,9 +86,9 @@ function battleInit(state) {
     battle.battleId = initInfo.battleId;
 
     // Players
-    for (var partyMember = 0; partyMember < initInfo.party.length; partyMember++) {
+    for (var partyMember = 0; partyMember < ((initInfo.party.length >= 4) ? 4 : initInfo.party.length); partyMember++) {
         if (initInfo.party[partyMember] >= 0) { // skip fake characters
-            battle.characters.push(createCharacter(true, initInfo.party[partyMember], sPartyCoordinates[partyMember].x, sPartyCoordinates[partyMember].y));
+            battle.characters.push(createCharacter(true, initInfo.party[partyMember], sPartyCoordinates[initInfo.battleId][partyMember][0], sPartyCoordinates[initInfo.battleId][partyMember][1]));
         }
     }
 
