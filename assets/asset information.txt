@@ -4,5 +4,4 @@ character sprites by cloudn64
 "ultiman theme" by cloudn64
 "victory theme" by cloudn64
 "game over theme" by cloudn64
-I think there's some stolen dragon ball music in there somewhere I dunno who did that
 font by some guy on fontspace.com (see license info in assets/font)
