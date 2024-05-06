@@ -34,5 +34,5 @@ function preloadDraw(state) {
     fill(255, 255, 255);
     textAlign(CENTER);
     textSize(15);
-    text("Game Initialized!\nClick or Tap to begin the game.\n", width / 2, height / 2);
+    text("Please click anywhere to begin the game.", width / 2, height / 2);
 }
