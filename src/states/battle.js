@@ -338,7 +338,9 @@ function battleUpdate(state) {
             battleAction.update(battleAction); // I don't know why I have to pass battleAction to this function, actually. Getting tired of JavaScript today
         }
     }
-
+    if (battle.allEnemiesDead && battle.battleId == 1){
+        battle.background = waterFightEndImg;
+    }
     if (battle.allPlayersDead || battle.allEnemiesDead) {
         battle.atbWait = true;
     }
