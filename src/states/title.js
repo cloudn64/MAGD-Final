@@ -36,7 +36,7 @@ function titleScreenDraw(state) {
     fill(2255, 255, 255);
     textAlign(CENTER);
     textSize(35);
-    text("Fight Game", width / 2, height / 2);
+    text("Fight Game", width / 2, height / 2.2);
 
     title.temporaryButton.draw();
 }
