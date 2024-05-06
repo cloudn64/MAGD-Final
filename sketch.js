@@ -41,6 +41,7 @@ function preload() {
   waterFightEndImg = loadImage('assets/backgrounds/waterbottlefightend.png');
   titleScreenImg = loadImage('assets/backgrounds/titlescreenbackground.png');
   battleFieldImg = loadImage('assets/backgrounds/battlefieldbackground.png');
+  selectScreenImg = loadImage('assets/backgrounds/selectscreenbackground.png');
 
 }
 

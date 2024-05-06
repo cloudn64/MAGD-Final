@@ -61,6 +61,7 @@ const sWaterSkillList = [
     REFLECT_SKILL,
     SLOWII_SKILL,
     HASTEII_SKILL,
+    ENRAGEI_SKILL,
 ];
 
 // Characters
